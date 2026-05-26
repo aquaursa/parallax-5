@@ -1,11 +1,11 @@
-# TOOL-MAPPING v1.0
+# PARALLAX-5 Mapping Protocol v1.0
 
-**Canonical Mapping of Smart-Contract Analysis Tool Findings to PARALLAX-5 Obligations**
+**Specification for tool-mapping documents in the PARALLAX-5 registered-mapping pattern**
 
 | | |
 |---|---|
 | **Version** | 1.0.0 |
-| **Status** | Draft for community review |
+| **Status** | Stable since v1.0.1; namespace pattern introduced in v1.1.0 |
 | **Authors** | AquaUrsa Research |
 | **License** | CC0 1.0 Universal (per Non-Capturability Charter Article 2) |
 | **Date** | May 2026 |
@@ -13,6 +13,29 @@
 | **Repository** | github.com/aquaursa-research/parallax5-coordinator |
 
 ---
+
+
+
+## 0. The namespace pattern (added in substrate v1.1.0)
+
+This document specifies a **protocol**, not a single mapping. The
+PARALLAX-5 coordinator accepts certificates that reference any
+registered tool-mapping conforming to this protocol. The substrate
+ships one reference mapping, **`aquaursa-v1`**, authored by AquaUrsa
+Research and located at `mappings/aquaursa-v1.json`. Its narrative
+companion is `docs/mappings/aquaursa-v1.md`. Other authors are
+invited to publish their own mappings under the namespace pattern
+
+```
+tool-mapping/{author}-v{major}
+```
+
+See `mappings/README.md` for the registration process.
+
+When this document refers to "the mapping" below (e.g., in
+"the mapping enables compositional verification"), substitute any
+specific registered mapping the reader is using; the protocol
+described here is identical across all conforming mappings.
 
 ## 1. Purpose
 

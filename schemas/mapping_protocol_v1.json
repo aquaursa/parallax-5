@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://parallax.xyz/schemas/mapping_protocol_v1.json",
+  "title": "PARALLAX-5 Mapping Protocol v1",
+  "description": "Defines the schema that any registered tool-mapping must satisfy. The mapping protocol enables a registry of named mappings — AquaUrsa Research publishes the reference mapping aquaursa-v1; other authors may publish their own mappings under tool-mapping/{author}-v{major} namespaces. The PARALLAX-5 coordinator accepts certificates referencing any conforming mapping; the certificate names which mapping was used (per certificate_v1.json §mapping). License: CC0.",
+  "type": "object",
+  "required": [
+    "namespace",
+    "version",
+    "title",
+    "depth_legend",
+    "obligation_legend",
+    "tool_capabilities"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "namespace": {
+      "type": "string",
+      "pattern": "^tool-mapping/[a-z0-9_-]+-v[0-9]+$",
+      "description": "Globally unique mapping identifier in the form tool-mapping/{author}-v{major}. The {author} segment is lower-case ASCII identifying the mapping authority; {major} segment is the integer major version. Examples: tool-mapping/aquaursa-v1, tool-mapping/trailofbits-v1."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver string. Major bumps signal an incompatible change in coverage interpretation; minor bumps add tools or refine depth values; patch bumps fix justification text or typos. The major component must match the namespace's -v{major} suffix."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "maxLength": 256},
+          "url":  {"type": "string", "format": "uri"},
+          "orcid": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"}
+        }
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier. The PARALLAX-5 Non-Capturability Charter (Article 2) requires registered mappings to use a license compatible with public reuse (CC0, CC-BY, Apache-2.0, MIT). License: CC0-1.0 is recommended for mappings entering the registry.",
+      "examples": ["CC0-1.0", "CC-BY-4.0", "Apache-2.0", "MIT"]
+    },
+    "publication": {
+      "type": "object",
+      "description": "Where this mapping is permanently published. Authors are expected to deposit each major version on Zenodo or an equivalent permanent archive; the DOI may then be cited from certificates that use this mapping.",
+      "properties": {
+        "doi_target":   {"type": "string", "description": "DOI for this version, or 'to-be-assigned-on-deposit' if not yet published."},
+        "github_ref":   {"type": "string"},
+        "last_updated": {"type": "string", "format": "date"},
+        "next_review":  {"type": "string", "format": "date"}
+      }
+    },
+    "depth_legend": {
+      "type": "object",
+      "description": "The six-level monotone evidence-depth ladder. The legend keys are stringified integers 0..5; the values are descriptions. All registered mappings share the same depth ladder; this field is here so that consumers of the mapping document do not need to reference the substrate paper separately.",
+      "required": ["0", "1", "2", "3", "4", "5"],
+      "additionalProperties": false,
+      "properties": {
+        "0": {"type": "string"},
+        "1": {"type": "string"},
+        "2": {"type": "string"},
+        "3": {"type": "string"},
+        "4": {"type": "string"},
+        "5": {"type": "string"}
+      }
+    },
+    "obligation_legend": {
+      "type": "object",
+      "description": "Short labels for the five PARALLAX-5 obligations. All registered mappings share the same five obligations.",
+      "required": ["A1", "A2", "A3", "A4", "A5"],
+      "additionalProperties": false,
+      "properties": {
+        "A1": {"type": "string"},
+        "A2": {"type": "string"},
+        "A3": {"type": "string"},
+        "A4": {"type": "string"},
+        "A5": {"type": "string"}
+      }
+    },
+    "tool_capabilities": {
+      "type": "object",
+      "description": "Maps tool identifier → tool capability. Each tool capability contains (a) the tool's pinned version, (b) the URL to documentation for the tool's findings, (c) a list of mapping entries, each translating a tool-native finding identifier to an (obligation, depth, justification) triple.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["version_pin", "entries"],
+        "additionalProperties": false,
+        "properties": {
+          "version_pin":       {"type": "string"},
+          "documentation_url": {"type": "string", "format": "uri"},
+          "calibration_note":  {"type": "string"},
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["finding_id", "obligation", "depth", "justification"],
+              "additionalProperties": false,
+              "properties": {
+                "finding_id":    {"type": "string", "description": "Tool-native finding identifier."},
+                "name":          {"type": "string", "description": "Human-readable finding name (optional)."},
+                "severity":      {"type": "string", "enum": ["informational", "low", "medium", "high", "critical"]},
+                "obligation":    {"type": "string", "enum": ["A1", "A2", "A3", "A4", "A5"]},
+                "depth":         {"type": "integer", "minimum": 0, "maximum": 5},
+                "justification": {"type": "string", "minLength": 1, "maxLength": 2048}
+              }
+            }
+          }
+        }
+      }
+    },
+    "compositional_examples": {
+      "type": "array",
+      "description": "Worked examples illustrating how this mapping aggregates per-tool capabilities into joint capability per the substrate's Compositional Coverage Theorem (Parallax5/Compositional.lean).",
+      "items": {
+        "type": "object",
+        "required": ["case_label", "what_each_tool_finds"],
+        "additionalProperties": true,
+        "properties": {
+          "case_label":           {"type": "string", "minLength": 1, "maxLength": 256},
+          "what_each_tool_finds": {"type": "object"},
+          "joint_depth_on_A1":    {"type": "integer", "minimum": 0, "maximum": 5},
+          "joint_depth_on_A2":    {"type": "integer", "minimum": 0, "maximum": 5},
+          "joint_depth_on_A3":    {"type": "integer", "minimum": 0, "maximum": 5},
+          "joint_depth_on_A4":    {"type": "integer", "minimum": 0, "maximum": 5},
+          "joint_depth_on_A5":    {"type": "integer", "minimum": 0, "maximum": 5},
+          "marginal_value":       {"type": "string"},
+          "but_for_A1":           {"type": "string"},
+          "but_for_A2":           {"type": "string"},
+          "but_for_A3":           {"type": "string"},
+          "but_for_A4":           {"type": "string"},
+          "but_for_A5":           {"type": "string"}
+        }
+      }
+    },
+    "open_problems": {
+      "type": "array",
+      "description": "Known limitations of this mapping that authors flag for community refinement.",
+      "items": {"type": "string"}
+    }
+  }
+}

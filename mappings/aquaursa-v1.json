@@ -1,0 +1,323 @@
+{
+  "$schema": "https://parallax.xyz/schemas/mapping_protocol_v1.json",
+  "namespace": "tool-mapping/aquaursa-v1",
+  "version": "1.0.0",
+  "title": "AquaUrsa Tool-Mapping v1",
+  "description": "The AquaUrsa Research reference mapping from per-tool finding categories to PARALLAX-5 obligations. This is one mapping in the registered-mapping pattern; other authors may publish their own under tool-mapping/{author}-v{major} namespaces.",
+  "authors": [
+    {
+      "name": "AquaUrsa Research",
+      "url": "https://aquaursa.io"
+    }
+  ],
+  "license": "CC0-1.0",
+  "publication": {
+    "doi_target": "to-be-assigned-on-deposit",
+    "github_ref": "to-be-assigned",
+    "last_updated": "2026-05-26",
+    "next_review": "2026-08-26"
+  },
+  "depth_legend": {
+    "0": "No coverage. Tool produces nothing relevant to this obligation.",
+    "1": "Mention. Tool reports code location; humans interpret. Not machine-checkable.",
+    "2": "Static detector. Pattern match flagged the issue. Sound up to detector calibration; false positives possible.",
+    "3": "Symbolic-path witness. Path-condition is exhibited; restricted by exploration bounds.",
+    "4": "Formal property. Verified by symbolic / bounded model checker against a stated invariant.",
+    "5": "Machine-checked theorem. Property is a theorem in an interactive proof assistant accepted by the kernel."
+  },
+  "obligation_legend": {
+    "A1": "Value conservation (relational)",
+    "A2": "Authorization closure",
+    "A3": "Signature integrity",
+    "A4": "Temporal distinctness",
+    "A5": "External-attestation trust boundary"
+  },
+  "tool_capabilities": {
+    "slither": {
+      "version_pin": "0.10.x",
+      "documentation_url": "https://github.com/crytic/slither/wiki/Detector-Documentation",
+      "entries": [
+        {
+          "finding_id": "arbitrary-send-eth",
+          "severity": "high",
+          "obligation": "A1",
+          "depth": 2,
+          "justification": "Detects ether-sending operations where the recipient is attacker-controlled or unconstrained. Such operations violate the value-conservation property when they exfiltrate funds outside the protocol-defined accounting."
+        },
+        {
+          "finding_id": "arbitrary-send-erc20",
+          "severity": "high",
+          "obligation": "A1",
+          "depth": 2,
+          "justification": "Same as above for ERC-20 transfers. Pattern-matches on transfer/transferFrom calls with unconstrained arguments."
+        },
+        {
+          "finding_id": "controlled-array-length",
+          "severity": "high",
+          "obligation": "A1",
+          "depth": 2,
+          "justification": "Array length manipulation can corrupt storage layout; downstream consequence is conservation violation if the corrupted slot holds balance or supply state."
+        },
+        {
+          "finding_id": "incorrect-equality",
+          "severity": "medium",
+          "obligation": "A1",
+          "depth": 1,
+          "justification": "Strict equality on balances/supply is a weak indicator; not a direct conservation violation but a code smell."
+        },
+        {
+          "finding_id": "unprotected-upgrade",
+          "severity": "high",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Unprotected proxy-upgrade endpoints violate authorization closure: a non-admin can replace the implementation."
+        },
+        {
+          "finding_id": "unprotected-initialize",
+          "severity": "high",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Re-entrant or unprotected initializer; an attacker can claim privileged roles."
+        },
+        {
+          "finding_id": "suicidal",
+          "severity": "high",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Unguarded selfdestruct removes the contract; authorization to do so was not enforced."
+        },
+        {
+          "finding_id": "tx-origin",
+          "severity": "medium",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Reliance on tx.origin for authorization is a known authorization-closure failure mode (phishing-via-intermediary)."
+        },
+        {
+          "finding_id": "delegatecall-loop",
+          "severity": "high",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Delegatecall to user-supplied target lets an attacker execute arbitrary code in the caller's storage context."
+        },
+        {
+          "finding_id": "reentrancy-eth",
+          "severity": "high",
+          "obligation": "A4",
+          "depth": 2,
+          "justification": "Classical reentrancy via ether call. Violates temporal-distinctness: state updates after external call admit re-entry."
+        },
+        {
+          "finding_id": "reentrancy-no-eth",
+          "severity": "medium",
+          "obligation": "A4",
+          "depth": 2,
+          "justification": "Reentrancy without ether (e.g., ERC-20 callbacks). Same temporal-distinctness violation."
+        },
+        {
+          "finding_id": "reentrancy-events",
+          "severity": "low",
+          "obligation": "A4",
+          "depth": 2,
+          "justification": "Event emission after external call; reorderable. Weaker temporal-distinctness violation but flagged for completeness."
+        },
+        {
+          "finding_id": "reentrancy-benign",
+          "severity": "informational",
+          "obligation": "A4",
+          "depth": 1,
+          "justification": "Local state change after external call but no apparent state inconsistency. Mention-grade evidence."
+        },
+        {
+          "finding_id": "reentrancy-unlimited-gas",
+          "severity": "high",
+          "obligation": "A4",
+          "depth": 2,
+          "justification": "Call.value with no gas stipend; full reentrancy attack surface."
+        }
+      ]
+    },
+    "mythril": {
+      "version_pin": "0.24.x",
+      "documentation_url": "https://github.com/SmartContractSecurity/SWC-registry",
+      "entries": [
+        {
+          "finding_id": "SWC-105",
+          "name": "Unprotected Ether Withdrawal",
+          "obligation": "A1",
+          "depth": 3,
+          "justification": "Mythril produces a path-condition witness for an unauthorized ether withdrawal, providing depth-3 evidence (vs Slither's depth-2 detector). Symbolic execution discovers the exploit path."
+        },
+        {
+          "finding_id": "SWC-105",
+          "name": "Unprotected Ether Withdrawal",
+          "obligation": "A2",
+          "depth": 3,
+          "justification": "Same finding establishes failure of authorization closure: the path leads to ether removal without the expected access-control check."
+        },
+        {
+          "finding_id": "SWC-106",
+          "name": "Unprotected SELFDESTRUCT",
+          "obligation": "A2",
+          "depth": 3,
+          "justification": "Symbolic path to SELFDESTRUCT without authorization predicate."
+        },
+        {
+          "finding_id": "SWC-107",
+          "name": "Reentrancy",
+          "obligation": "A4",
+          "depth": 3,
+          "justification": "Mythril symbolic execution exhibits a reentrancy exploit path; depth-3 evidence."
+        },
+        {
+          "finding_id": "SWC-115",
+          "name": "Authorization through tx.origin",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Pattern detector for tx.origin reliance; symbolic execution does not strengthen the evidence beyond detection."
+        },
+        {
+          "finding_id": "SWC-117",
+          "name": "Signature Malleability",
+          "obligation": "A3",
+          "depth": 2,
+          "justification": "Detector for malleable ECDSA signature patterns (e.g., not enforcing low-s). Static-detector depth; full signature integrity proof requires the cryptographic assumption (external to Mythril)."
+        },
+        {
+          "finding_id": "SWC-122",
+          "name": "Lack of Proper Signature Verification",
+          "obligation": "A3",
+          "depth": 2,
+          "justification": "Pattern match for missing signature checks on privileged operations."
+        },
+        {
+          "finding_id": "SWC-101",
+          "name": "Integer Overflow/Underflow",
+          "obligation": "A1",
+          "depth": 3,
+          "justification": "Symbolic exploration finds arithmetic paths that violate conservation when value wraps. (Largely subsumed by Solidity 0.8+ checked arithmetic; relevant for unchecked blocks and legacy code.)"
+        }
+      ]
+    },
+    "halmos": {
+      "version_pin": "0.2.x",
+      "documentation_url": "https://github.com/a16z/halmos",
+      "entries": [
+        {
+          "finding_id": "invariant-violated",
+          "obligation": "A1",
+          "depth": 4,
+          "justification": "Halmos checks user-specified property functions (Foundry-style `check_*` and `invariant_*`) against bounded symbolic execution. A counterexample to a conservation invariant is depth-4 evidence (formal property). Coverage CONDITIONAL on the user writing the property."
+        },
+        {
+          "finding_id": "invariant-violated",
+          "obligation": "A2",
+          "depth": 4,
+          "justification": "Same mechanism for authorization invariants (e.g., 'only admin can call X')."
+        },
+        {
+          "finding_id": "invariant-violated",
+          "obligation": "A3",
+          "depth": 4,
+          "justification": "ECDSA modeled as symbolic uninterpreted function in halmos; signature-integrity properties can be stated and checked at depth 4."
+        },
+        {
+          "finding_id": "invariant-violated",
+          "obligation": "A4",
+          "depth": 4,
+          "justification": "Reentrancy invariants (e.g., 'no external call before state update') can be stated as halmos properties."
+        },
+        {
+          "finding_id": "invariant-violated",
+          "obligation": "A5",
+          "depth": 4,
+          "justification": "Oracle staleness and quorum invariants can be stated as halmos properties. This is the ONLY tool in the stack capable of depth-4 evidence on A5."
+        }
+      ],
+      "calibration_note": "Halmos's capability is conditional on user-supplied properties. Cold-run (no property file) depth is 0. With property file and full-coverage assertions, depth is 4 for each asserted obligation. The capability_matrix uses the intrinsic ceiling (4); the empirical study reports cold-run vs with-spec separately."
+    },
+    "obligationsol": {
+      "version_pin": "parallax5-v6",
+      "documentation_url": "https://parallax.xyz/research",
+      "entries": [
+        {
+          "finding_id": "A1_supply_inflation_signature",
+          "obligation": "A1",
+          "depth": 2,
+          "justification": "Axiom-signature pattern for supply-inflating operations (mint without offsetting debit, transfer-to-self loops, balance-of-zero-address writes)."
+        },
+        {
+          "finding_id": "A2_unprotected_admin_signature",
+          "obligation": "A2",
+          "depth": 2,
+          "justification": "Detection of admin-protected operations missing the access-control modifier or guard."
+        },
+        {
+          "finding_id": "A4_reentrancy_lock_absent",
+          "obligation": "A4",
+          "depth": 2,
+          "justification": "Reentrancy-guard absence detection across all external-call entry points."
+        },
+        {
+          "finding_id": "A4_call_depth_unbounded",
+          "obligation": "A4",
+          "depth": 2,
+          "justification": "Detection of recursive calls without depth bounds."
+        },
+        {
+          "finding_id": "A5_oracle_stale_window",
+          "obligation": "A5",
+          "depth": 2,
+          "justification": "Oracle staleness checking: the freshness window is either absent or too permissive. UNIQUE to ObligationSol in the four-tool stack."
+        },
+        {
+          "finding_id": "A5_oracle_quorum_insufficient",
+          "obligation": "A5",
+          "depth": 2,
+          "justification": "Oracle quorum (m-of-n) check: when m is too low or quorum is bypassable, A5 is violated. UNIQUE to ObligationSol in the four-tool stack."
+        }
+      ]
+    }
+  },
+  "compositional_examples": [
+    {
+      "case_label": "DAO 2016 (A4 reentrancy)",
+      "what_each_tool_finds": {
+        "slither": "reentrancy-eth, severity=high, depth=2",
+        "mythril": "SWC-107, symbolic path, depth=3",
+        "halmos": "No detection unless user writes nonReentrant invariant",
+        "obligationsol": "A4_reentrancy_lock_absent, depth=2"
+      },
+      "joint_depth_on_A4": 3,
+      "marginal_value": "Mythril provides depth-3 (symbolic path); others provide depth-2. Joint adds value through cross-confirmation (three tools agree).",
+      "but_for_A5": "All four tools report depth=0 on A5. The certificate cannot reach P-level above 0 unless halmos is invoked with an A5 property OR ObligationSol is replaced with a richer A5 detector."
+    },
+    {
+      "case_label": "Mango Markets (A5 oracle manipulation, $115M)",
+      "what_each_tool_finds": {
+        "slither": "Nothing: no oracle detector",
+        "mythril": "Nothing: no oracle reasoning",
+        "halmos": "No detection unless user writes oracle-freshness invariant",
+        "obligationsol": "A5_oracle_stale_window + A5_oracle_quorum_insufficient, depth=2"
+      },
+      "joint_depth_on_A5": 2,
+      "marginal_value": "Without ObligationSol, the stack has ZERO coverage on A5. ObligationSol is necessary (not just useful) for any A5 evidence in the default stack. This is the canonical example of compositional necessity."
+    },
+    {
+      "case_label": "BeanstalkProtocol governance attack ($182M, A2)",
+      "what_each_tool_finds": {
+        "slither": "Potentially detects via emergency-execution patterns if rules cover it",
+        "mythril": "May find via symbolic execution if reachability is in budget",
+        "halmos": "Detects with property 'only quorum can execute proposal'",
+        "obligationsol": "A2_unprotected_admin_signature partial match"
+      },
+      "joint_depth_on_A2": 4,
+      "marginal_value": "Halmos's depth-4 with property dominates; the other three provide complementary lower-depth evidence supporting the same conclusion."
+    }
+  ],
+  "open_problems": [
+    "Cross-function reentrancy: detectors at depth-2 miss many cases; symbolic execution at depth-3 finds some; halmos at depth-4 finds them with appropriate invariants. The capability matrix entries should be refined when restricted to cross-function specifically.",
+    "Oracle-manipulation under MEV: A5 violations dependent on MEV-extracted information are out of scope of current tooling.",
+    "Off-chain attestation freshness ($A_5$): the deposit instance of EVMYulLean uses attestationFresh := true (conservative); a faithful implementation requires an upstream EVMYulLean extension."
+  ]
+}
