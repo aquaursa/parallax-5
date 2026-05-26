@@ -4,6 +4,77 @@ All notable changes to PARALLAX-5 are documented in this file. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-05-27
+
+### Added (Move 10: mapping registry)
+
+- **Registered-mapping pattern.** The substrate now supports a registry
+  of named tool-mappings. The reference `tool-mapping/aquaursa-v1`
+  ships in `mappings/aquaursa-v1.json`; other authors may publish
+  their own mappings under `tool-mapping/{author}-v{major}` namespaces.
+  See `mappings/README.md` for the registration process.
+- **`schemas/mapping_protocol_v1.json`** formally defines the schema
+  every registered mapping must satisfy. Distinct from the previous
+  `schemas/tool_mapping_v1.json` which conflated the schema with the
+  AquaUrsa data instance.
+- **`docs/MAPPING_PROTOCOL.md`** (rewrite of the prior
+  `docs/TOOL_MAPPING.md`) describes the protocol for tool-mapping
+  documents. The narrative companion for the AquaUrsa instance is
+  `docs/mappings/aquaursa-v1.md`.
+- **Coordinator API** (`parallax5_coordinator.capability`): three new
+  exports — `load_mapping(namespace)`, `load_mapping_document(namespace)`,
+  `list_registered_mappings()`. The legacy module-level constants
+  (`SLITHER_CAPABILITY`, etc.) remain as aliases whose values match
+  the loaded values exactly (enforced by
+  `tests/test_mapping_registry.py`).
+- **CLI** (`parallax5 certify`): `--mapping NAMESPACE` flag and
+  `--list-mappings` discovery flag. Defaults to
+  `tool-mapping/aquaursa-v1` when neither is set or provided in the
+  spec.
+- **Fire tests** (`tests/test_mapping_registry.py`, 11 new tests):
+  schema validation for every file in `mappings/`,
+  namespace–version consistency, drift check between loaded values
+  and legacy module constants, CLI mapping-resolution paths.
+
+### Changed
+
+- Certificate emission now resolves the `mapping` field via
+  `_resolve_mapping_field()` with precedence
+  `--mapping > spec.mapping > default(aquaursa-v1)`. Externally
+  observable behavior unchanged on default-path runs; the new
+  behavior is purely additive.
+
+### Deprecated (slated for removal in v2.0)
+
+- Direct import of `SLITHER_CAPABILITY`, `MYTHRIL_CAPABILITY`,
+  `HALMOS_CAPABILITY`, `AXIOMSOL_CAPABILITY` — use
+  `load_mapping(namespace)` instead.
+- `schemas/tool_mapping_v1.json` (the schema/data-conflated file).
+  The same data lives at `mappings/aquaursa-v1.json` with proper
+  namespace metadata; the schema lives at
+  `schemas/mapping_protocol_v1.json`. The conflated file is kept
+  during the v1.x line for backward compatibility with downstream
+  tooling.
+
+### Migration
+
+Downstream code reading the AquaUrsa mapping should switch from
+
+```python
+from parallax5_coordinator.capability import SLITHER_CAPABILITY  # old
+```
+
+to
+
+```python
+from parallax5_coordinator.capability import load_mapping
+caps = load_mapping("tool-mapping/aquaursa-v1")
+slither = caps["slither"]                                          # new
+```
+
+Both yield identical values during the v1.x line. The legacy
+imports will be removed in v2.0.
+
 ## [1.0.1] — 2026-05-26
 
 Repository-hygiene release. No change to the substrate's mathematical

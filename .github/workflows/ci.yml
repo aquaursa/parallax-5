@@ -24,7 +24,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install jsonschema pyyaml ecdsa z3-solver cvc5 yices-solver click
+          pip install jsonschema pyyaml ecdsa z3-solver cvc5 yices-solver click pytest
 
       - name: Compositional theorems (expect 2,152 checks pass)
         run: PYTHONPATH=src python -m parallax5_coordinator.theorems
@@ -37,6 +37,8 @@ jobs:
 
       - name: ObligationSol fire tests
         run: PYTHONPATH=. python parallax/obligationsol/fire_tests.py
+      - name: Mapping registry tests (expect 11/11)
+        run: PYTHONPATH=src python -m pytest tests/test_mapping_registry.py -v
 
       - name: Worked-example certificates validate
         run: |

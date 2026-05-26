@@ -21,6 +21,45 @@ from datetime import datetime, timezone, timedelta
 from .capability import capability_matrix_table, KNOWN_TOOLS, JointCapability, p_level
 from .findings import map_findings, load_tool_mapping
 from .certifier import certify, explain
+
+
+def _resolve_mapping_field(spec: dict, override_namespace: str | None) -> dict:
+    """Return the `mapping` field of an emitted certificate.
+
+    Resolution precedence:
+      1. --mapping CLI override (if provided)
+      2. spec["mapping"] (if present in the spec YAML)
+      3. The substrate default (tool-mapping/aquaursa-v1)
+    The returned field carries namespace, version, and (if available)
+    DOI for the resolved mapping.
+    """
+    from .capability import (
+        load_mapping_document,
+        DEFAULT_MAPPING_NAMESPACE,
+        DEFAULT_MAPPING_DOI,
+    )
+    namespace = override_namespace
+    if namespace is None:
+        namespace = spec.get("mapping", {}).get("namespace", DEFAULT_MAPPING_NAMESPACE)
+    try:
+        doc = load_mapping_document(namespace)
+        out = {"namespace": doc["namespace"], "version": doc["version"]}
+        doi = doc.get("publication", {}).get("doi_target")
+        if doi and not doi.startswith("to-be-assigned"):
+            out["doi"] = doi
+        elif namespace == DEFAULT_MAPPING_NAMESPACE:
+            out["doi"] = DEFAULT_MAPPING_DOI
+        return out
+    except FileNotFoundError:
+        # Spec referenced a mapping we don't have on disk. Emit the
+        # field anyway with whatever the spec provided, since the
+        # certificate still records what was requested.
+        return spec.get("mapping", {
+            "namespace": DEFAULT_MAPPING_NAMESPACE,
+            "version": "1.0.0",
+            "doi": DEFAULT_MAPPING_DOI,
+        })
+
 from .runner import run_all, gather_findings
 from .crops import (CROPSDimension, WalkawayClass, compute_crops_vector)
 from .capability import Depth
@@ -162,6 +201,16 @@ def cmd_validate(args):
 
 
 def cmd_certify(args):
+    if getattr(args, "list_mappings", False):
+        from .capability import list_registered_mappings
+        namespaces = list_registered_mappings()
+        if not namespaces:
+            print("No registered mappings found in mappings/")
+        else:
+            print("Registered tool-mappings:")
+            for ns in namespaces:
+                print(f"  {ns}")
+        return
     """Issue a certificate from a YAML specification."""
     try:
         import yaml
@@ -261,10 +310,7 @@ def cmd_certify(args):
         "protocol": spec["protocol"],
         "artifact": {"source_hash": source_hash, **spec.get("artifact", {})},
         "deployment": spec.get("deployment", []),
-        "mapping": spec.get("mapping", {
-            "namespace": "tool-mapping/aquaursa-v1", "version": "1.0.0",
-            "doi": "10.5281/zenodo.20386868"
-        }),
+        "mapping": _resolve_mapping_field(spec, getattr(args, "mapping", None)),
         "trust_base": spec.get("trust_base", {
             "ecdsa_euf_cma": True, "evm_yul_lean_refinement": True,
             "assumptions": ["No additional security-interface assumptions disclosed"]
@@ -412,6 +458,20 @@ def main():
     
     p_cert = sub.add_parser("certify")
     p_cert.add_argument("spec"); p_cert.add_argument("--output"); p_cert.add_argument("--signing-key")
+    p_cert.add_argument(
+        "--mapping",
+        default=None,
+        help=(
+            "Tool-mapping namespace to certify under (e.g. tool-mapping/aquaursa-v1). "
+            "Defaults to the spec's `mapping.namespace` field, or "
+            "tool-mapping/aquaursa-v1 if neither is provided."
+        ),
+    )
+    p_cert.add_argument(
+        "--list-mappings",
+        action="store_true",
+        help="List registered mapping namespaces and exit (no certificate emitted).",
+    )
     p_cert.set_defaults(func=cmd_certify)
     
     p_reg = sub.add_parser("registry")

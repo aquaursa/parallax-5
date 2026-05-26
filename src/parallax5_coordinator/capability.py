@@ -253,3 +253,121 @@ def capability_matrix_table() -> str:
     rows.append("  4 = formal property checker (user-spec)")
     rows.append("  5 = machine-checked theorem")
     return "\n".join(rows)
+
+
+# ─── Mapping registry (added in substrate v1.1.0) ────────────────────
+# The coordinator can load any mapping conforming to
+# schemas/mapping_protocol_v1.json from the mappings/ directory. The
+# legacy module-level capability constants (SLITHER_CAPABILITY, …) are
+# the values from mappings/aquaursa-v1.json and remain available as
+# aliases for backward compatibility. New code should call
+# load_mapping(namespace).
+
+import json as _json
+from pathlib import Path as _Path
+
+DEFAULT_MAPPING_NAMESPACE = "tool-mapping/aquaursa-v1"
+DEFAULT_MAPPING_DOI       = "10.5281/zenodo.20386868"
+
+
+def _namespace_to_filename(namespace: str) -> str:
+    """tool-mapping/aquaursa-v1 -> aquaursa-v1.json"""
+    if not namespace.startswith("tool-mapping/"):
+        raise ValueError(
+            f"Mapping namespace must start with 'tool-mapping/'; got {namespace!r}"
+        )
+    return namespace.removeprefix("tool-mapping/") + ".json"
+
+
+def _find_mappings_dir() -> _Path:
+    """Locate the substrate's mappings/ directory.
+
+    Resolves relative to the installed package's repository root if
+    found there; falls back to the current working directory's
+    mappings/ subdirectory.
+    """
+    here = _Path(__file__).resolve()
+    for parent in here.parents:
+        candidate = parent / "mappings"
+        if (candidate / "README.md").exists() and (candidate / "aquaursa-v1.json").exists():
+            return candidate
+    return _Path.cwd() / "mappings"
+
+
+def load_mapping(
+    namespace: str = DEFAULT_MAPPING_NAMESPACE,
+    *,
+    mappings_dir: _Path | None = None,
+) -> Dict[str, ToolCapability]:
+    """Load the named tool-mapping and return a {tool_id: ToolCapability} dict.
+
+    The returned dict drops in for KNOWN_TOOLS. The full mapping
+    document (including compositional examples and open problems) is
+    available via :func:`load_mapping_document`.
+    """
+    doc = load_mapping_document(namespace, mappings_dir=mappings_dir)
+    out: Dict[str, ToolCapability] = {}
+    tool_caps = doc.get("tool_capabilities", {})
+    for tool_id, tool_data in tool_caps.items():
+        # Derive per-tool depth-by-obligation from the entries list:
+        # for each obligation, take the max depth across entries for
+        # that obligation (matching the original calibration semantics).
+        depth_by_ob: Dict[Obligation, Depth] = {
+            ob: Depth.NONE for ob in Obligation
+        }
+        for entry in tool_data.get("entries", []):
+            ob_name = entry["obligation"]
+            try:
+                ob = Obligation[ob_name]
+            except KeyError:
+                continue
+            entry_depth = Depth(int(entry["depth"]))
+            if entry_depth > depth_by_ob[ob]:
+                depth_by_ob[ob] = entry_depth
+        out[tool_id] = ToolCapability(
+            tool_id=tool_id,
+            version=tool_data.get("version_pin", "unknown"),
+            depth_by_obligation=depth_by_ob,
+            notes=tool_data.get("calibration_note", ""),
+        )
+    return out
+
+
+def load_mapping_document(
+    namespace: str = DEFAULT_MAPPING_NAMESPACE,
+    *,
+    mappings_dir: _Path | None = None,
+) -> dict:
+    """Load the raw mapping JSON document for the given namespace.
+
+    Returns the parsed contents of mappings/{slug}.json. Use this for
+    access to compositional_examples, open_problems, or other fields
+    beyond the per-tool capability table.
+    """
+    md = mappings_dir or _find_mappings_dir()
+    filename = _namespace_to_filename(namespace)
+    path = md / filename
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Mapping namespace {namespace!r} not found at {path}. "
+            f"Available mappings: {sorted(p.stem for p in md.glob('*.json'))}"
+        )
+    return _json.loads(path.read_text())
+
+
+def list_registered_mappings(mappings_dir: _Path | None = None) -> list[str]:
+    """Return the namespaces of all mappings present in the registry."""
+    md = mappings_dir or _find_mappings_dir()
+    if not md.is_dir():
+        return []
+    namespaces: list[str] = []
+    for f in sorted(md.glob("*.json")):
+        try:
+            doc = _json.loads(f.read_text())
+            ns = doc.get("namespace")
+            if isinstance(ns, str) and ns.startswith("tool-mapping/"):
+                namespaces.append(ns)
+        except Exception:
+            continue
+    return namespaces
+
