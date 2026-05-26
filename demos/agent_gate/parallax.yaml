@@ -1,0 +1,60 @@
+protocol:
+  name: PARALLAX-5 Demo 3 — RuntimeGate
+  version: 1.0.0
+  identifier: parallax5_coordinator/demos/agent_gate
+  category: agent
+
+# The contract being certified is the gate itself (not the target vault).
+# The gate is the mechanism that delivers D5 enforcement; that is what
+# this certificate's evidence covers.
+contract_source: contracts/RuntimeGate.sol
+tools: [slither]
+
+trust_base:
+  ecdsa_euf_cma: false
+  evm_yul_lean_refinement: true
+  assumptions:
+    - "TargetVault.agentManager is the gate contract address (set at vault construction, immutable thereafter)"
+    - "Solidity 0.8.20 integer overflow checks are sound"
+    - "block.timestamp drift is bounded by Ethereum consensus rules (≤15s)"
+    - "The agentKey may be arbitrarily adversarial (jailbroken, compromised, hallucinating); the gate's guarantees are over the agent's BEHAVIOR space, not its INTENT"
+
+walkaway:
+  classification: bounded
+  proof_ref: "demos/agent_gate/proof/Containment.lean"
+  explanation: "RuntimeGate has no admin role, no proxy pattern, no upgrade path. maxOutflowPercent, whitelistedSpenders, agentKey, and vault are all immutable post-construction. The bounded (not full) classification reflects that the GATED protocol stack (TargetVault) has an owner — the user — who can withdraw funds at will. This is correct: the user retains exit. The agent's authority is bounded by the gate's predicates; the user's authority is unbounded by design (they own their vault). The walkaway is bounded by the fact that the agent's authority cannot be removed without redeploying — there is no key-rotation function. In practice this is acceptable because the gate's predicates already foreclose the most dangerous agent actions."
+  dependencies_disclosed:
+    - "TargetVault must be deployed with agentManager set to this gate's address; if set to anything else, the gate's predicates are not enforced"
+    - "The gate enforces predicates on the agent's calls to itself; it cannot prevent calls made directly to the vault by an entity that has somehow acquired vault.agentManager privileges (which by construction is only this gate)"
+
+external_evidence:
+  - obligation: A1
+    depth: 5
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: ai_agent_containment_a1
+    justification: "Lean 4 theorem gate_bounds_single_transfer in demos/agent_gate/proof/Containment.lean establishes that any applied transfer is bounded by maxOutflowPercent * vaultBalance / 100. The theorem holds for ANY agent behavior — adversarial or honest. D5 (runtime enforced) because the gate's check is not merely proved correct ABOUT the runtime; it IS the runtime enforcement mechanism. Zero sorry."
+  - obligation: A2
+    depth: 5
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: ai_agent_containment_a2
+    justification: "Lean 4 theorems gate_enforces_whitelist and gate_bounds_approval establish that any applied approve is to a whitelisted spender AND bounded by maxApproval. The whitelist is immutable post-construction. D5 because enforcement is at transaction submission time. Zero sorry."
+  - obligation: A4
+    depth: 4
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: daily_budget_temporal_distinctness
+    justification: "The gate's dailyOutflow + dailyOutflowResetTime tracking provides temporal distinctness for the daily-budget invariant. The Lean theorem gate_single_step_containment establishes per-step correctness; the daily-budget extension is verified via the simulate.py state machine."
+
+source_openness_depth: 5
+privacy_primitives_depth: 0
+
+issuer:
+  name: "AquaUrsa Research (PARALLAX-5 Demo 3)"
+  public_key: "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c"
+
+mapping:
+  namespace: "tool-mapping/aquaursa-v1"
+  version: "1.0.0"
+  doi: "10.5281/zenodo.20386868"

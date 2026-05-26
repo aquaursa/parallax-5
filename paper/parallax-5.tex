@@ -1,0 +1,1770 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[final,protrusion=true,expansion=false]{microtype}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+
+% ───────────────────────────────────────────────────────────────────
+% Typography & spacing
+% ───────────────────────────────────────────────────────────────────
+\setlist[itemize]{itemsep=3pt, topsep=4pt, parsep=0pt}
+\setlist[enumerate]{itemsep=3pt, topsep=4pt, parsep=0pt}
+\renewcommand{\arraystretch}{1.15}
+
+% Section heading rhythm — slightly more breathing room before sections
+\titlespacing*{\section}{0pt}{1.6em plus 0.4em minus 0.2em}{0.8em}
+\titlespacing*{\subsection}{0pt}{1.2em plus 0.3em minus 0.2em}{0.6em}
+\titlespacing*{\subsubsection}{0pt}{1.0em plus 0.2em minus 0.2em}{0.5em}
+\titlespacing*{\paragraph}{0pt}{0.6em plus 0.2em minus 0.1em}{0.8em}
+
+% Give LaTeX room to break long-identifier-heavy paragraphs without overfull boxes
+\setlength{\emergencystretch}{3em}
+\tolerance=1000
+
+% Author block — tighter line spacing
+\renewcommand{\arraystretch}{1.15}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  citecolor=blue!50!black,
+  urlcolor=blue!50!black,
+  pdftitle={PARALLAX-5: A Five-Obligation Substrate for Smart Contracts and AI Agents},
+  pdfauthor={Benjamin P. Duncan, AquaUrsa Research},
+  pdfsubject={A five-obligation substrate for smart-contract safety, mechanically verified in Lean 4},
+  pdfkeywords={formal verification, Lean 4, EVM, DeFi, smart contract security, refinement, PARALLAX-5, EVMYulLean},
+}
+
+\definecolor{leangray}{rgb}{0.95,0.95,0.95}
+\lstdefinestyle{lean}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{leangray},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  keywordstyle=\color{blue!60!black}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  morekeywords={theorem,def,instance,class,structure,by,intro,exact,refine,
+                cases,rfl,decide,rw,unfold,where,sorry,Prop,Type,fun,let,if,
+                then,else,match,with,end,namespace,attribute,prefix,Decidable,
+                Nat,Bool,inferInstance,split,omega,Or,And,Not,True,False,
+                show,have,DecidableEq,Repr,deriving,exists,forall,not,Loss,
+                noncomputable,Classical},
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{obligation}{Obligation}
+
+\title{\textbf{PARALLAX-5: A Five-Obligation Substrate for Smart Contracts and AI Agents}}
+
+\author{Benjamin P.\ Duncan \\
+AquaUrsa Research \\
+\texttt{\url{https://github.com/aquaursa/parallax-5}} \\
+\small{Paper DOI: \texttt{10.5281/zenodo.20400525}} \\
+\small{Verification artifact: \texttt{doi:10.5281/zenodo.20386868}}}
+
+\date{May 2026 \\[0.3em]
+\small Paper licensed under CC-BY 4.0. Standard text under CC0 1.0. Code under Apache-2.0.}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\thepage}
+\lhead{PARALLAX-5}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We propose PARALLAX-5, a transition-level obligation interface for value-bearing decentralized systems. The interface consists of five primitive obligations: value conservation, authorization closure, signature integrity, temporal distinctness, and external-attestation trust. We prove that, under an explicit security-interface adequacy condition, every trust-base-respecting loss-inducing transition has a non-empty violation signature; the claim is falsifiable by basis counterexamples and we define them precisely. We introduce a parameterized basis-observability predicate $\mathrm{ObservableUnder}_\Omega(t)$ relative to four canonical observation sets $\Omega_{\mathrm{chain}} \subset \Omega_{\mathrm{config}} \subset \Omega_{\mathrm{intent}} \subset \Omega_{\mathrm{infra}}$, making prior basis-observable classifications principled rather than binary. We define a step-secure gate that checks both post-state invariants and transition obligations and prove it is the maximally permissive accept/reject shield preserving the basis. Monitor soundness alone suffices for safety. The same gate composes with adaptive agent policies for session-level guarantees, with cross-VM refinement for transfer across domain machines, and with an on-chain indistinguishability result that identifies the irreducible scope boundary. The Lean~4 module compiles to 95 theorems with zero \texttt{sorry}; all 129 Python fire tests pass. Empirically, our 53-incident catalog (2016--2026, \$5.97~billion aggregate losses) classifies each entry by its minimum observability set: \$3.60B at $\Omega_{\mathrm{chain}}$, \$1.37B additionally at $\Omega_{\mathrm{config}}$, and \$1.00B genuinely irreducible.
+
+The substrate is composed with a production EVM semantics in Lean~4 via a typeclass-based refinement: nineteen abstract theorems lift to compiled Lean~4 proof terms over Nethermind's \texttt{EvmYul.EVM.State} (Cancun fork) under a single instance registration, with the verification artifact deposited at \texttt{doi:10.5281/zenodo.20386868}. The integration achieves interface transport and partial semantic fidelity (Section~\ref{sec:evm-backend}); contract-level verification of deployed bytecode is the proper subject of downstream tooling. A compositional verification architecture (Theorems~\ref{thm:compositional-coverage}, \ref{thm:certificate-monotonicity}) treats the joint coverage of a tool stack as the pointwise maximum of per-tool capabilities. The substrate's ecosystem layer adds a walkaway property formalizing founder-independent operation; a five-component PARALLAX-CROPS vector extending the single-axis depth scale; a 19-field machine-checkable certificate schema with seven-state lifecycle; and three worked examples covering value conservation, bridge attestation, and AI-agent runtime gating. The substrate's standard text is published under CC0 with structurally irrevocable non-capturability commitments: no trademark on the name, no AquaUrsa patent claims over the disclosed techniques, no token, no governance body.
+\end{abstract}
+
+\tableofcontents
+
+\section*{Reading Guide}
+\addcontentsline{toc}{section}{Reading Guide}
+
+This paper is written for several audiences with different priorities. The structure supports non-linear reading.
+
+\begin{itemize}\itemsep0.2em
+  \item \textbf{Formal-methods reviewers} should read \S\ref{sec:axioms}--\ref{sec:offchain} (the formal core), \S\ref{sec:walkaway} (walkaway), \S\ref{sec:evm-backend} (EVMYulLean composition, with attention to the explicit fidelity caveats in Table~\ref{tab:evmyul-fidelity}), and \S\ref{sec:compositional-verification} (compositional architecture). The Claims Table in \S\ref{sec:claims} separates theorems from assumptions from artifact claims.
+  \item \textbf{DeFi security practitioners} should read \S\ref{sec:axioms} (the five obligations), \S\ref{sec:empirical} (the 53-incident catalog), \S\ref{sec:case-studies} (three worked examples), and \S\ref{sec:cert-schema} (the certificate). The audit-to-certificate workflow lives in the case studies.
+  \item \textbf{Ethereum-aligned infrastructure and policy audiences} should read \S\ref{sec:walkaway} (walkaway), \S\ref{sec:crops} (PARALLAX-CROPS), \S\ref{sec:case-studies} (worked examples, especially Demo~3 on AI-agent containment), and \S\ref{sec:governance} (non-capturability commitments).
+  \item \textbf{Risk and underwriting audiences} should read \S\ref{sec:empirical} and the unified loss ledger in \S\ref{sec:loss-ledger}, then \S\ref{sec:economics} (the framework sketch; per-protocol calibration is deferred to a companion document).
+\end{itemize}
+
+\noindent The paper's central technical claim is the conditional-completeness theorem (\S\ref{sec:cond-completeness}). The paper's central practical artifact is the certificate (\S\ref{sec:cert-schema}). The paper's central commercial wedge is the AI-agent runtime gate (\S\ref{ssec:demo-agent}). Readers pressed for time can begin with whichever of these is most relevant and trace cross-references from there.
+
+\section*{Notation and Abbreviations}
+\addcontentsline{toc}{section}{Notation and Abbreviations}
+
+\noindent\textbf{Obligation symbols.}
+\begin{itemize}\itemsep0em
+  \item $A_1$ value conservation; $A_2$ authorization closure; $A_3$ signature integrity; $A_4$ temporal distinctness; $A_5$ external-attestation trust.
+  \item $\sigma(t) \subseteq \{A_1,\dots,A_5\}$: the violation signature of transition $t$ --- the set of obligations $t$ violates.
+\end{itemize}
+
+\noindent\textbf{Depth scale.}
+\begin{itemize}\itemsep0em
+  \item $D_0,\dots,D_5$: the proof-depth scale. $D_0$ = no coverage; $D_1$ = comment-grade mention; $D_2$ = static-detector pattern match; $D_3$ = symbolic execution; $D_4$ = formal proof; $D_5$ = runtime enforcement.
+\end{itemize}
+
+\noindent\textbf{Observation sets.}
+\begin{itemize}\itemsep0em
+  \item $\Omega_{\mathrm{chain}} \subset \Omega_{\mathrm{config}} \subset \Omega_{\mathrm{intent}} \subset \Omega_{\mathrm{infra}}$: the four canonical observation sets a monitor may read (\S\ref{sec:obs-sets}).
+  \item $\mathrm{ObservableUnder}_\Omega(t)$: the basis-observability predicate for transition $t$ under observation set $\Omega$.
+\end{itemize}
+
+\noindent\textbf{Gate predicates.}
+\begin{itemize}\itemsep0em
+  \item $\mathrm{StateSecure}(s')$: the basis-respecting predicate over post-states.
+  \item $B(t)$: the basis-respecting predicate over transitions.
+  \item $\mathrm{StepSecure}(t) := \mathrm{StateSecure}(s') \wedge B(t)$: a step-secure gate accepts $t$ iff $\mathrm{StepSecure}(t)$ holds.
+\end{itemize}
+
+\noindent\textbf{PARALLAX-CROPS dimensions.}
+\begin{itemize}\itemsep0em
+  \item $(C, R, O, P, S) \in D^5$: the five-component trust-surface vector. $C$ censorship-resistance; $R$ capture-resistance (separate from $C$); $O$ openness; $P$ privacy; $S$ aggregate security.
+\end{itemize}
+
+\noindent\textbf{Walkaway classification.}
+\begin{itemize}\itemsep0em
+  \item Full / Bounded / Partial / Centralized / Fake: the five-level classification (\S\ref{sec:walkaway}).
+  \item $\mathrm{Adm}(P)$: the set of off-chain parties holding a privileged role in protocol $P$.
+\end{itemize}
+
+\noindent\textbf{Loss-ledger quantities (\S\ref{sec:loss-ledger}).}
+\begin{itemize}\itemsep0em
+  \item $L_{\Omega_{\mathrm{chain}}}$, $L_{\Omega_{\mathrm{config}}}$, $L_{\Omega_{\mathrm{intent}}}$, $L_{\mathrm{irreducible}}$: losses rejectable by a sound monitor with the given observation set, partitioned exhaustively over the 53-incident catalog.
+\end{itemize}
+
+\noindent\textbf{Frequently used abbreviations.}
+\begin{itemize}\itemsep0em
+  \item TVL: total value locked; CDP: collateralized debt position; AMM: automated market maker; CPMM: constant-product market maker; ECDSA: Elliptic Curve Digital Signature Algorithm; EUF-CMA: existential unforgeability under chosen-message attack; SMT: satisfiability modulo theories.
+  \item EVM: Ethereum Virtual Machine; EVMYulLean: Nethermind's Lean~4 mechanization of the EVM, validated against the Ethereum test suite at the Cancun fork; ArkLib: an EF-funded zkEVM Lean library.
+  \item CC0: Creative Commons Zero (public domain dedication); RFC: Request for Comments (specification draft).
+\end{itemize}
+
+\section{Introduction}\label{sec:intro}
+
+\paragraph{The central claim, stated precisely.} The central claim of this paper is falsifiable. A \emph{basis counterexample} is a trust-base-respecting transition that causes protected-value loss while satisfying all five obligations. Our formal results show that, under a stated adequacy condition, no such transition exists in the abstract model; our empirical results show that no such transition appears in our 41-incident basis-observable corpus, including off-chain-rooted attacks whose on-chain consequence violates the basis. We do not claim full semantic completeness over arbitrary EVM bytecode. The substrate is a compact security interface whose adequacy can be challenged, refined, and mechanically checked.
+
+\paragraph{Theorem 2 is not a semantic-completeness theorem over all bytecode.} It is a \emph{decomposition theorem}: once the security interface is accepted as adequate for a transition class, all loss-inducing transitions in that class have a non-empty violation signature. The substantive claims are exposed as explicit adequacy obligations and empirical falsification targets, not hidden inside the proof.
+
+\paragraph{Motivation.} Decentralized finance has lost approximately \$10~billion to exploits since 2020~\cite{rekt,defillama}. Despite extensive auditing and existing static analyzers, the same vulnerability patterns recur. The community has accumulated a large taxonomy of attack vectors~\cite{owasp,halborn-top100} but lacks a unifying theoretical framework that is simultaneously (a) small enough to fit on one page, (b) precise enough to be mechanically checkable, and (c) general enough to extend across execution environments and to AI-agent contexts.
+
+\paragraph{Two-axis empirical classification.} We classify each historical incident along two distinct axes. The \emph{root-cause axis} records where the failure originated (on-chain code, off-chain key, off-chain signer, off-chain infrastructure, or mixed). The \emph{basis-observability axis} records whether the malicious transition would be rejected by a sound gate. These axes are not aligned: off-chain root causes can produce \emph{basis-observable} consequences (Resolv's unbacked mint, Drift's fake collateral whitelist, Kelp DAO's invalid bridge message) that a sound gate would reject. The irreducible residual under on-chain enforcement is $L_{\mathrm{basis\text{-}unobservable}}$, not the naive off-chain total.
+
+\paragraph{Contributions.} The paper's contributions are:
+\begin{itemize}
+  \item \textbf{Conditional completeness} (Theorem~\ref{thm:cond-complete}): under an explicit adequacy assumption, every trust-base-respecting loss-inducing transition violates at least one obligation. The assumption is itself falsifiable.
+  \item \textbf{Falsification criterion} (Theorem~\ref{thm:falsif}): completeness over a transition class is equivalent to absence of basis counterexamples in that class.
+  \item \textbf{Step-secure gate and gate transition safety} (Theorem~\ref{thm:gate-trans-safety}): a gate that checks step security — state-level post-condition \emph{and} transition predicate $B$ — preserves not only post-state invariants but \emph{also} the basis predicate of every executed transition. The naive post-state-only gate is insufficient because $A_2, A_3, A_4$ are transition properties not inferrable from post-state alone.
+  \item \textbf{Maximal permissive safety} (Theorem~\ref{thm:max-safe}): among all safety-preserving gates, the step-secure gate $G^\star$ accepts the largest set of actions.
+  \item \textbf{Adaptive session safety} (Theorem~\ref{thm:adaptive}): for any agent policy, iterated $G^\star$ keeps the state in the invariant envelope.
+  \item \textbf{Step-secure refinement transfer} (Theorem~\ref{thm:refinement}): with step-security preservation as the missing hypothesis, the abstract gate safety theorem genuinely commutes across the abstraction.
+  \item \textbf{Mechanically verified EVMYulLean composition} (Theorem~\ref{thm:evmyul-refinement}): nineteen abstract refinement theorems lift to compiled Lean~4 proof terms over Nethermind's \texttt{EvmYul.EVM.State} (Cancun fork) under a single typeclass instance registration; the verification is byte-level reproducible across three independent runs and externally re-verifiable via the deposit at \texttt{doi:10.5281/zenodo.20386868}~\cite{duncan2026parallax5verification}.
+  \item \textbf{Compositional verification architecture} (Theorems~\ref{thm:compositional-coverage}, \ref{thm:certificate-monotonicity}): a graded-evidence model under which the joint coverage of a tool set is the pointwise max of per-tool capabilities, and adding a tool to the stack never lowers the certifiable compliance level. The architecture is implemented as an open-source coordinator that runs Slither, Mythril, halmos, and ObligationSol against a contract and emits a versioned PARALLAX-5 certificate with full audit trail. The accompanying TOOL-MAPPING v1.0 calibration artifact translates per-tool findings to obligation-graded evidence with justifications.
+  \item \textbf{On-chain indistinguishability} (Theorem~\ref{thm:offchain-indist}): no on-chain-only monitor can distinguish worlds with identical observations but differing trust-base assumptions. This justifies the basis-unobservable category as an information-theoretic boundary.
+  \item \textbf{Strengthened economic theorem with monitor false negatives} (Proposition~\ref{prop:p-star-eps}): $p^* = (1-c/v)/(1-\epsilon)$; deterrence by adoption alone becomes mathematically impossible when $\epsilon > c/v$.
+  \item \textbf{Two-axis empirical catalog} (Section~\ref{sec:empirical}, Appendix supplement \texttt{catalog.csv}): 53 incidents totaling \$5.97~billion classified by root cause and basis observability, yielding $L_{\mathrm{basis\text{-}observable}} = \$4.01\text{B}$ and $L_{\mathrm{basis\text{-}unobservable}} = \$1.62\text{B}$.
+  \item \textbf{Loss-prevention ceiling with false negatives} (Proposition~\ref{prop:loss-ceiling}): the gate prevents at most $p(1-\epsilon) L_{\mathrm{basis\text{-}observable}}$; the residual is $L_{\mathrm{basis\text{-}unobservable}} + (1-p(1-\epsilon)) L_{\mathrm{basis\text{-}observable}}$.
+  \item \textbf{Industry standard} (Section~\ref{sec:standards}): PARALLAX-5 with five compliance levels (P0--P5) and a machine-checkable certificate format.
+\end{itemize}
+
+\section{Threat Model and Trust Base}\label{sec:threat-model}
+
+\subsection{Trust Base Assumptions}
+
+Three off-chain assumptions sit outside the basis:
+\begin{itemize}
+  \item OA$_1$ Key Integrity: signing keys are not exfiltrated, duplicated, or lost.
+  \item OA$_2$ Signer Sovereignty: multisig and governance signers are not coerced, deceived, or coordinated.
+  \item OA$_3$ Infrastructure Integrity: RPC nodes, oracle data sources, validator software are not subverted.
+\end{itemize}
+Let $\mathrm{TB}(w) := \mathrm{OA}_1(w) \wedge \mathrm{OA}_2(w) \wedge \mathrm{OA}_3(w)$.
+
+\subsection{Transition-Level Model}
+
+A transition is $t = (s, o, s')$. For each obligation $A_i$, we define a transition predicate $A_i(t)$. The basis predicate is $B(t) := A_1(t) \wedge A_2(t) \wedge A_3(t) \wedge A_4(t) \wedge A_5(t)$. The violation signature is $\sigma(t) := \{ i : \neg A_i(t) \}$.
+
+\subsection{Loss Predicate}
+
+$\mathrm{Loss}(t, w)$ denotes that transition $t$ in world $w$ causes unauthorized loss, unbacked minting, illicit value extraction, collateral misvaluation, or violation of a protocol-defined protected-value relation.
+
+\section{The Five Obligations}\label{sec:axioms}
+
+\subsection{$A_1$ Value Conservation}
+
+\begin{obligation}[Value Conservation, $A_1$]\label{ob:a1}
+Every value-affecting transition preserves a protocol-specific conservation relation $C(s, o, s')$ over assets, liabilities, shares, claims, collateral, minted supply, burned supply, fees, and rounding residuals.
+\end{obligation}
+
+Specializations:
+\begin{itemize}
+  \item Vault: $C_{\mathrm{vault}}(s,o,s') := \mathrm{backing}(s') \geq \mathrm{claims}(s') \wedge \mathrm{minLiq}(s') \wedge \mathrm{noZeroShareMint}(s,o,s') \wedge \mathrm{roundingLoss}(s,o,s') \leq \epsilon$.
+  \item Lending: $C_{\mathrm{lending}}(s,o,s') := \mathrm{collateralValue}(s') \geq \lambda \cdot \mathrm{debt}(s')$ (where collateral value depends on $A_5$).
+  \item Stablecoin: $C_{\mathrm{stable}}(s,o,s') := \mathrm{reserves}(s') + \mathrm{authorizedCredit}(s') \geq \mathrm{supply}(s')$.
+\end{itemize}
+
+The bidirectional formulation matters. An initial one-directional formulation was refuted by Z3, which constructed a counter-witness exploiting integer division-by-zero. The strengthened biconditional removes the pathology.
+
+\subsection{$A_2$ Authorization Closure}
+
+\begin{obligation}[Authorization Closure, $A_2$]
+Every state-mutating operation requires the caller to satisfy the operation's authorization predicate.
+\end{obligation}
+
+\subsection{$A_3$ Signature Integrity}
+
+\begin{obligation}[Signature Integrity, $A_3$]
+Every signature-bound authorization has $\mathrm{ecrecover}(h, v, r, s_\sigma) \neq 0 \wedge \mathrm{ecrecover}(h, v, r, s_\sigma) = \text{expected}$, with $h$ incorporating domain separator, nonce, deadline, chain ID.
+\end{obligation}
+
+\subsection{$A_4$ Temporal Distinctness}
+
+We formalize $A_4$ with an explicit sequencing dependency relation.
+
+\begin{definition}[Sequencing dependency relation]
+Let $\Delta \subseteq \mathcal{O} \times \mathcal{O}$ be a protocol-specific relation where $(o_1, o_2) \in \Delta$ iff $o_1$ must happen-before $o_2$, or $o_2$ must not observe stale or intermediate state from $o_1$.
+\end{definition}
+
+\begin{obligation}[Temporal Distinctness, $A_4$]\label{ob:a4}
+For a transition $t = (s, o, s')$:
+\[
+\begin{aligned}
+A_4(t) :={} & \mathrm{depth}(t) = 0 \wedge \mathrm{noIntermediateRead}(t) \\
+            & {} \wedge \mathrm{respectsHappensBefore}(t, \Delta) \\
+            & {} \wedge \mathrm{noSameBlockDependencyInversion}(t, \Delta).
+\end{aligned}
+\]
+\end{obligation}
+
+This brings MEV/order-dependence cases into formal scope.
+
+\subsection{$A_5$ External-Attestation Trust Boundary}
+
+We parameterize $A_5$ by an explicit adversary model.
+
+\begin{definition}[Adversary parameter]
+The adversary parameter 
+\[
+\mathrm{Adv} := \langle \mathrm{budget}, \mathrm{latency}, \mathrm{corruptionThreshold}, \mathrm{liquidityAccess}, \mathrm{validatorControl} \rangle
+\]
+parameterizes the adversary against which manipulation-resistance is asserted.
+\end{definition}
+
+\begin{obligation}[External-Attestation Trust Boundary, $A_5$]\label{ob:a5}
+Every state transition consuming an external fact $x$ verifies:
+\[
+A_5(t) := \mathrm{fresh}(x, \tau_{\max}) \wedge \mathrm{domainBound}(x) \wedge \mathrm{ManipResistant}(x, \mathrm{Adv}) \wedge \mathrm{Quorum}(x, q_{\min}) \wedge \mathrm{Diversity}(x).
+\]
+\end{obligation}
+
+Specializations:
+\begin{itemize}
+  \item Price feed: $\mathrm{ManipResistant}_{\mathrm{price}}$ requires liquidity depth, TWAP window, multi-source aggregation, deviation bound.
+  \item Bridge: $\mathrm{ManipResistant}_{\mathrm{bridge}}$ requires $q$-of-$n$ independent verifiers, source-chain finality, independent RPC paths.
+\end{itemize}
+This generalization brings Kelp DAO's 1-of-1 verifier configuration into the basis as an $A_5$ violation at configuration time.
+
+\section{Conditional Completeness and Falsifiability}\label{sec:cond-completeness}
+
+\begin{definition}[Security-interface adequacy]\label{def:adequacy}
+The five-obligation interface is \emph{adequate} for a class of value-bearing systems if
+\[
+\forall t, w.\quad \mathrm{TB}(w) \wedge B(t) \;\implies\; \neg \mathrm{Loss}(t, w).
+\]
+\end{definition}
+
+\begin{theorem}[Conditional completeness]\label{thm:cond-complete}
+Assume adequacy. Then $\forall t, w.\, \mathrm{TB}(w) \wedge \mathrm{Loss}(t, w) \implies \sigma(t) \neq \varnothing$.
+\end{theorem}
+
+\begin{theorem}[Falsification criterion]\label{thm:falsif}
+The basis is complete for transition class $\mathcal{C}$ iff no $t \in \mathcal{C}$ admits a basis counterexample $(t, w)$ with $\mathrm{TB}(w) \wedge \mathrm{Loss}(t, w) \wedge B(t)$.
+\end{theorem}
+
+\section{Minimality, Independence, and Closure}\label{sec:minimality}
+
+\begin{theorem}[Transition-level basis minimality]\label{thm:minimality}
+For every $i \in \{1, \ldots, 5\}$, there exists a transition $t_i$ such that $\neg A_i(t_i) \wedge \bigwedge_{j \neq i} A_j(t_i)$.
+\end{theorem}
+
+\begin{theorem}[Constructive closure inhabitation]\label{thm:closure}
+Given independence witnesses, every nonempty $S \subseteq \mathcal{A}$ is inhabited by a product transition.
+\end{theorem}
+
+\begin{proposition}[Concrete toy-machine inhabitation]\label{prop:toy-inhabit}
+For each nonempty $S \subseteq \{A_1, \ldots, A_5\}$, there exists a single-contract toy value-bearing machine (not a product of independent components) whose transition violates exactly $S$. This is formalized as the \texttt{ToyMachineState} record in our Lean module, with theorem \texttt{toy\_machine\_inhabits\_subset}.
+\end{proposition}
+
+The constructive theorem proves logical independence and absence of formal implication; the toy-machine result shows that inhabitation is not an artifact of free products.
+
+\section{Step-Secure Gates}\label{sec:gates}
+
+An earlier formulation defined the gate using a post-state-only check, which was incorrect: it checked only the post-state. Post-state-only checks miss $A_2$, $A_3$, and $A_4$ violations because these are transition properties — an unauthorized call can leave a perfectly Secure post-state.
+
+\subsection{Step Security}
+
+\begin{definition}[Step security]\label{def:step-secure}
+For a candidate transition $t = (s, a, s')$:
+\[
+\mathrm{StepSecure}(t) := \mathrm{StateSecure}(s') \wedge B(t).
+\]
+\end{definition}
+
+\subsection{The Maximal Safe Gate}
+
+\begin{definition}[Step-secure gate]\label{def:gate}
+\[
+G^\star(s, a) = \begin{cases}
+\tau(s, a) & \text{if } \mathrm{StepSecure}(s, a, \tau(s, a)),\\
+s & \text{otherwise.}
+\end{cases}
+\]
+\end{definition}
+
+\begin{theorem}[Gate state safety]\label{thm:gate-state-safety}
+$\mathrm{StateSecure}(s) \implies \mathrm{StateSecure}(G^\star(s, a))$.
+\end{theorem}
+
+\begin{theorem}[Gate transition safety]\label{thm:gate-trans-safety}
+If $G^\star(s, a) = \tau(s, a) \neq s$, then $B(s, a, \tau(s, a))$.
+\end{theorem}
+
+This is the strictly stronger property only the step-secure gate gives. The Lean theorems are \texttt{basis\_gate\_state\_safety} and \texttt{basis\_gate\_transition\_safety}.
+
+\subsection{Maximal Permissive Safety}
+
+\begin{theorem}[Maximal permissive safety, corrected]\label{thm:max-safe}
+Among all gates $H$ that either execute $\tau(s,a)$ or return $s$, and that never execute a non-step-secure transition from a secure pre-state, $G^\star$ accepts the largest possible set of actions.
+\end{theorem}
+
+\begin{proof}[Proof]
+If $G^\star$ rejects $a$ at $s$ (returns $s$), then $\mathrm{StepSecure}(s, a, \tau(s,a))$ fails. If $H$ executes $a$ ($H(s,a) = \tau(s,a)$), then by the safety hypothesis on $H$, $\mathrm{StepSecure}$ must hold — contradiction. Hence $H$ must also return $s$.
+\end{proof}
+
+The Lean theorem is \texttt{basis\_gate\_is\_maximal\_permissive}.
+
+\subsection{Monitor Soundness Suffices}
+
+\begin{theorem}[Monitor soundness suffices for gate safety]\label{thm:monitor-sound}
+If each monitor $m_i$ is sound ($m_i(t) = \mathrm{pass} \implies A_i(t)$), the monitor-implemented gate preserves the basis. No completeness or liveness assumption is required for safety.
+\end{theorem}
+
+\section{Adaptive AI-Agent Safety}\label{sec:ai-agent}
+
+\begin{theorem}[Adaptive iteration preserves security]\label{thm:adaptive}
+For any agent policy $\pi$ (adaptive, stochastic, history-dependent, adversarial, self-modifying), iterating $G^\star$ under $\pi$ keeps every reachable state secure.
+\end{theorem}
+
+\begin{corollary}[Agent containment]
+For any adaptive agent policy, the reachable state set under $G^\star$ is a subset of $\{s : \mathrm{Secure}(s)\}$.
+\end{corollary}
+
+The theorem does not prove globally safe AI. It proves that, for value-bearing state transitions mediated by sound monitors, the agent cannot drive the system outside the supplied invariant envelope.
+
+\section{Cross-VM Refinement}\label{sec:refinement}
+
+\begin{definition}[Step-secure refinement map]
+A step-secure refinement map from domain $D$ to abstract $V$ comprises $\alpha: S_D \to S_V$, $\alpha_A: \mathcal{A}_D \to \mathcal{A}_V$, and three preservation conditions:
+\begin{enumerate}
+  \item State predicate preservation: $\mathrm{StateSecure}_D(s) \iff \mathrm{StateSecure}_V(\alpha(s))$.
+  \item Transition simulation: $\alpha(\tau_D(s, a)) = \tau_V(\alpha(s), \alpha_A(a))$.
+  \item \textbf{Step-security preservation}:
+  \[ \mathrm{StepSecure}_D(s, a, \tau_D(s, a)) \iff \mathrm{StepSecure}_V(\alpha(s), \alpha_A(a), \tau_V(\alpha(s), \alpha_A(a))). \]
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Gate refinement transfer]\label{thm:refinement}
+Given a step-secure refinement map, $\alpha(G_D^\star(s, a)) = G_V^\star(\alpha(s), \alpha_A(a))$, and consequently abstract gate safety transfers to the domain machine.
+\end{theorem}
+
+Three instantiations: Solana SBPF (lamports/authority keys/CPI depth/sysvars), Move/Sui (resources/capabilities/txDepth/epochTime — Move's linear type system enforces no-forgery and no-duplication, but \emph{not} economic solvency or correct business logic), banking ledger (customer balances/authorized clerks/transaction depth/market-rate timestamps).
+
+\section{Off-Chain Trust Base and Indistinguishability}\label{sec:offchain}
+
+\begin{theorem}[On-chain indistinguishability of trust-base compromise]\label{thm:offchain-indist}
+If two worlds $w_0, w_1$ produce identical on-chain observations $\mathrm{obs}(w_0) = \mathrm{obs}(w_1)$ but differ in trust-base assumptions, then any on-chain-only monitor $M(w) = f(\mathrm{obs}(w))$ gives the same verdict on both: $M(w_0) = M(w_1)$.
+\end{theorem}
+
+\begin{corollary}
+Any system claiming to prevent both on-chain basis violations and off-chain key compromise must use information beyond the on-chain transition trace.
+\end{corollary}
+
+This makes the irreducible residual $L_{\mathrm{basis\text{-}unobservable}}$ precise: it is exactly the loss mass from transitions whose on-chain trace is observationally identical to a legitimate one.
+
+\section{Empirical Catalog}\label{sec:empirical}
+
+We classify 53 historical incidents (2016--2026) along two distinct axes. The full per-incident table with source URLs is in the supplementary \texttt{catalog.csv}; here we report aggregate statistics.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Root cause class & Incidents & Aggregate loss (\$M) & Share \\
+\midrule
+on-chain code/design & 38 & 3{,}378 & 56.6\% \\
+off-chain signer & 5 & 1{,}148 & 19.2\% \\
+off-chain key & 7 & 829 & 13.9\% \\
+off-chain infrastructure & 3 & 612 & 10.3\% \\
+\midrule
+\textbf{Total} & \textbf{53} & \textbf{5{,}967} & \textbf{100.0\%} \\
+\bottomrule
+\end{tabular}
+\caption{Root-cause summary. Where the failure originated.}\label{tab:root-cause}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Basis observability & Incidents & Aggregate loss (\$M) & Share \\
+\midrule
+basis-observable (gate would reject) & 43 & 4{,}008 & 67.2\% \\
+ambiguous (monitor-design-dependent) & 2 & 335 & 5.6\% \\
+basis-unobservable (residual) & 8 & 1{,}624 & 27.2\% \\
+\midrule
+\textbf{Total} & \textbf{53} & \textbf{5{,}967} & \textbf{100.0\%} \\
+\bottomrule
+\end{tabular}
+\caption{Basis-observability summary. Whether a sound gate would reject the malicious transition. Basis-observability is not aligned with root cause: 5 entries (\$629M) have off-chain root cause but produce basis-observable on-chain consequences (Resolv, Kelp DAO, PAID Network, EasyFi, bZx Polygon admin) — these are reclaimed by a sound gate even though their root cause is off-chain. Drift is classified separately as ambiguous; see §\ref{sec:obs-sets} for the parameterized treatment.}\label{tab:basis-obs}
+\end{table}
+
+\subsection{Key Reclassifications}
+
+\paragraph{Resolv Labs (2026, \$23M).} Root cause: AWS KMS key compromise (off-chain). Consequence: unbacked USR mint, an $A_1$ violation under \emph{relational} conservation (reserves $\geq$ supply). A sound A1 gate would have rejected the mint despite the off-chain root.
+
+\paragraph{Drift Protocol (2026, \$285M).} Root cause: DPRK social engineering of 2-of-5 multisig (off-chain signer). Consequence chain: (1) fake collateral whitelist, (2) deposit, (3) borrow against fake collateral. Under generalized $A_5$ with quorum/diversity requirements for collateral onboarding, step (1) is an $A_5$ violation. Pure on-chain authority check (naive $A_2$) would not catch it; intent-aware or quorum gates would. Classified as \emph{ambiguous}.
+
+\paragraph{Kelp DAO / LayerZero (2026, \$292M).} Root cause: 1-of-1 DVN verifier configuration (off-chain infrastructure). Consequence: bridge released reserves on invalid attestation. Under generalized $A_5$ requiring $q$-of-$n$ independent verifiers, the 1-of-1 configuration is an $A_5$ violation at deploy time, and the malicious bridge release is detectable. Classified as \emph{basis-observable}.
+
+\subsection{Bytecode-Level Reproduction}\label{sec:bytecode-repro}
+
+The basis predicates are not merely abstract: each archetype in the empirical catalog admits a bytecode-level reproduction. We provide four matched pairs of vulnerable and hardened Solidity contracts, each compiled to EVM bytecode and analyzed by halmos symbolic execution at the bytecode level. The vulnerable versions reproduce the relevant archetype; the hardened versions apply the canonical mitigation; halmos verifies the absence of the basis violation in the hardened versions over a bounded symbolic-path budget. The results below are reproducible from \texttt{parallax/formal/halmos/verify.sh}; each FAIL verdict is a concrete EVM bytecode counter-example trace, and each PASS is a bounded symbolic-path proof of absence.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+Property & halmos verdict & Witness / paths \\
+\midrule
+$A_1$ vulnerable (Cream-clone) & FAIL & atkDep=1, donation=524288, victimDep=524288 \\
+$A_1$ hardened (MIN\_LIQUIDITY) & PASS over 6 paths & --- \\
+$A_3$ vulnerable (Wormhole-clone) & FAIL & recovered=0, $v=0$ accepted \\
+$A_3$ hardened (zero+signer check) & PASS over 4 paths & --- \\
+$A_5$ vulnerable (Mango-clone) & FAIL & price=0, threshold=$2^{255}$ \\
+$A_5$ hardened (freshness gate) & PASS over 5 paths & --- \\
+$A_4$ cross-function (Solv-clone) & FAIL & amount=0x800000000000000 \\
+$A_4$ hardened (sibling guard) & PASS over 3 paths & --- \\
+\bottomrule
+\end{tabular}
+\caption{halmos symbolic-execution verdicts. Each FAIL is a concrete counter-example trace at the EVM bytecode level.}\label{tab:halmos}
+\end{table}
+
+\subsection{Exploit Normal Form}
+
+\begin{definition}[Basis normal form]
+An exploit report is in basis normal form when it identifies (i) the minimal transition trace producing protected-value loss, (ii) the violated obligation signature $\sigma(t)$, (iii) the root cause class, (iv) the basis observability, (v) the weakest precondition or patch restoring every violated obligation, and (vi) a machine-checkable artifact witnessing the violation or preservation.
+\end{definition}
+
+\section{Economic Security}\label{sec:economic}
+
+\subsection{The Per-Attack Theorem}
+
+An earlier formulation of this theorem incorrectly stated ``under $A_2$ preservation, attacker profit is zero''; this was inadequate because the attacker could exploit any of $A_1, A_3, A_4, A_5$. The corrected statement is:
+
+\begin{theorem}[No basis-violating exploit succeeds under a sound gate]\label{thm:no-basis-exploit}
+Assume every attack in a class $\mathcal{K}$ succeeds only by executing a transition $t$ with $\neg B(t)$. Under a sound step-secure gate, no attack in $\mathcal{K}$ executes successfully.
+\end{theorem}
+
+\begingroup\sloppy
+The Lean theorem is \texttt{no\_basis\_violating\_exploit} (full name: \texttt{no\_basis\_violating\_exploit\_\allowbreak under\_sound\_gate}). The corresponding Z3 result \texttt{prove\_no\_\allowbreak basis\_violating\_\allowbreak attack\_succeeds} returns UNSAT on the joint constraint (gate executes $\wedge$ executed transition violates $B$).
+\endgroup
+
+\begin{corollary}[Economic consequence]
+For attacks requiring basis violation:
+\[
+\mathbb{E}[\mathrm{utility}_{\mathrm{verified}}] \leq -c
+\]
+where $c$ is attack cost. ``Profit = 0'' is only correct when ``profit'' is defined gross-of-cost.
+\end{corollary}
+
+\subsection{Critical Adoption Rate with Monitor False Negatives}
+
+Let $p$ be substrate adoption rate, $\epsilon$ the conditional false-negative rate (probability a monitor misses an attack given the gate runs), $v$ attack value, $c$ attack cost. Attack succeeds with probability $1 - p(1-\epsilon)$, giving expected utility $U = (1 - p(1-\epsilon)) v - c$.
+
+\begin{proposition}[Critical verification rate]\label{prop:p-star-eps}
+The rational attacker is deterred iff
+\[
+p \geq p^* = \frac{1 - c/v}{1 - \epsilon}.
+\]
+Deterrence by adoption alone becomes mathematically impossible when $\epsilon > c/v$; at $\epsilon = c/v$, universal adoption ($p = 1$) is exactly the break-even boundary.
+\end{proposition}
+
+For $v = \$10^7$, $c = \$5 \times 10^4$ (so $c/v = 0.005$):
+\begin{itemize}
+  \item $\epsilon = 0$: $p^* = 0.995$ (\textbf{99.5\%} verified suffices).
+  \item $\epsilon = 0.001$: $p^* \approx 0.996$ (still feasible).
+  \item $\epsilon = 0.005 = c/v$: $p^* = 1.000$ (universal-adoption boundary).
+  \item $\epsilon = 0.01$: $p^* \approx 1.005$ — \textbf{impossible}.
+\end{itemize}
+
+The non-obvious finding: even with universal adoption, a monitor false-negative rate strictly above $c/v$ breaks deterrence. Complementary controls (legal penalties, staking forfeiture, chain-level slashing) are then necessary to increase effective attack cost.
+
+\subsection{Loss-Prevention Ceiling with the Two-Axis Model}
+
+An earlier formulation of this proposition treated $L_{\mathrm{off}}$ as the irreducible residual. Under the two-axis model, the correct residual is $L_{\mathrm{basis\text{-}unobservable}}$:
+
+\begin{proposition}[Loss-prevention ceiling, corrected]\label{prop:loss-ceiling}
+Let $L_{\mathrm{basis}}$ be losses whose exploit transition would be rejected by a sound basis gate (regardless of whether the root cause is on-chain or off-chain). Let $L_{\mathrm{unobs}}$ be losses whose exploit transition is observationally indistinguishable from a legitimate transition (satisfies the basis; failure entirely in the off-chain trust base). Then a gate with adoption rate $p$ and false-negative rate $\epsilon$ prevents at most
+\[
+p(1-\epsilon) L_{\mathrm{basis}}
+\]
+of historical losses. The residual is
+\[
+L_{\mathrm{unobs}} + (1 - p(1-\epsilon)) L_{\mathrm{basis}}.
+\]
+\end{proposition}
+
+\begin{table}[t]
+\centering
+\begin{tabular}{rrrr}
+\toprule
+$p$ & Prevented (\$B, $\epsilon=0$) & Residual (\$B) & \% prevented \\
+\midrule
+0\%   & 0.00 & 5.97 & 0.0\% \\
+25\%  & 1.00 & 4.97 & 16.8\% \\
+50\%  & 2.00 & 3.97 & 33.6\% \\
+75\%  & 3.01 & 2.96 & 50.4\% \\
+90\%  & 3.61 & 2.36 & 60.5\% \\
+99\%  & 3.97 & 2.00 & 66.5\% \\
+100\% & 4.01 & 1.96 & 67.2\% \\
+\bottomrule
+\end{tabular}
+\caption{Counterfactual loss prevention with $L_{\mathrm{basis}} = \$4.01\text{B}$, $L_{\mathrm{unobs+amb}} = \$1.96\text{B}$. The asymptotic ceiling is 67.2\% under the conservative assumption that ambiguous incidents (\$0.34B) are not prevented. A nuanced model treating half of ambiguous loss as preventable (sensitivity analysis only) yields a ceiling of 70.0\%. The headline 67.2\% figure attributes off-chain-rooted-but-on-chain-consequence losses (\$629M) as preventable; the prior naive on/off-chain split would have classified these as unrecoverable.}\label{tab:loss-ceiling}
+\end{table}
+
+
+
+
+
+\subsection{Parameterized Basis-Observability}\label{sec:obs-sets}
+
+The binary basis-observability predicate of earlier formulations conflates several distinct information requirements. We parameterize basis-observability by an explicit observation set $\Omega$.
+
+\begin{definition}[Observation set]\label{def:omega}
+An \emph{observation set} $\Omega \subseteq \mathcal{O}$ is the set of facts a monitor can read about a candidate transition $t$. We define four canonical sets with $\Omega_{\mathrm{chain}} \subset \Omega_{\mathrm{config}} \subset \Omega_{\mathrm{intent}} \subset \Omega_{\mathrm{infra}}$:
+\begin{itemize}
+  \item $\Omega_{\mathrm{chain}}$: on-chain state and transaction data only.
+  \item $\Omega_{\mathrm{config}}$: $\Omega_{\mathrm{chain}}$ plus declared protocol configuration (verifier quorum, oracle source set, risk parameters, admin-role membership).
+  \item $\Omega_{\mathrm{intent}}$: $\Omega_{\mathrm{config}}$ plus signer intent, governance proposal metadata, wallet UI context, off-chain co-signed pre-images.
+  \item $\Omega_{\mathrm{infra}}$: $\Omega_{\mathrm{intent}}$ plus external infrastructure state (KMS integrity, RPC compromise, DNS status, validator-node health).
+\end{itemize}
+\end{definition}
+
+\begin{definition}[$\Omega$-basis-observability]\label{def:omega-obs}
+A transition $t$ is \emph{$\Omega$-basis-observable} iff there exists a sound monitor $M$ using only observations in $\Omega$ such that $M(t) = \mathrm{reject}$ on every basis-violating transition matching $t$'s archetype.
+\end{definition}
+
+Under this refinement, several classifications that were previously ``ambiguous'' become principled. Drift Protocol's fake-collateral-whitelist incident is $\Omega_{\mathrm{chain}}$-unobservable (the on-chain action was an authorized admin call) but $\Omega_{\mathrm{config}}$-observable (the declared collateral-onboarding policy requires a multi-stage review and time delay that this transition skipped). Resolv Labs' unbacked mint is $\Omega_{\mathrm{config}}$-unobservable (the protocol configuration permits the mint authority) but $\Omega_{\mathrm{intent}}$-observable (an intent-aware monitor with declared session-policy on minting would have rejected). CoW Swap's DNS hijack is genuinely $\Omega_{\mathrm{infra}}$-unobservable: the victim signs legitimately, and no monitor without breaking trust-base assumptions about DNS itself can distinguish.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Minimum observation set & Entries & Loss (\$M) \\
+\midrule
+$\Omega_{\mathrm{chain}}$ & 41 & 3{,}599.5 \\
+$\Omega_{\mathrm{config}}$ & 5 & 1{,}367.0 \\
+$\Omega_{\mathrm{intent}}$ & 0 & 0.0 \\
+$\Omega_{\mathrm{infra}}$-unobservable (genuinely irreducible) & 7 & 999.5 \\
+\bottomrule
+\end{tabular}
+\caption{53-incident catalog re-classified by minimum required observation set. The bulk of historical loss is recoverable at $\Omega_{\mathrm{chain}}$ alone; $\Omega_{\mathrm{config}}$ extends reach to bridge configuration and oracle policy. Genuinely irreducible loss is bounded at \$1.0B (16.7\% of total). Reproducer at \texttt{parallax/formal/observation\_sets.py}.}\label{tab:obs-sets}
+\end{table}
+
+This parameterization sharpens the framework's claims: rather than a binary ``basis-observable / not'', each incident has a \emph{minimum information requirement} for the monitor that would have caught it. Monitor designers select $\Omega$ appropriately; protocols select an appropriate compliance level given their available monitoring infrastructure.
+
+\subsection{Unified loss ledger}\label{sec:loss-ledger}
+
+The catalog supports two complementary aggregations: a coarse \emph{binary} basis-observability summary (Table~\ref{tab:basis-obs}, retained for backward compatibility) and a refined \emph{observation-set} decomposition (Table~\ref{tab:obs-sets}, the headline model). To prevent confusion across these views, Table~\ref{tab:loss-ledger} consolidates the headline quantities with one explicit definition per row. The observation-set model is treated as primary; the binary view is a derived projection.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrl}
+\toprule
+Quantity & Loss (\$B) & Meaning \\
+\midrule
+$L_{\Omega_{\mathrm{chain}}}$ & 3.60 & rejectable with chain-only monitor (41 incidents) \\
+$L_{\Omega_{\mathrm{config}}\setminus\Omega_{\mathrm{chain}}}$ & 1.37 & additionally rejectable with declared-configuration monitor (5 incidents) \\
+$L_{\Omega_{\mathrm{intent}}\setminus\Omega_{\mathrm{config}}}$ & 0.00 & additionally rejectable with intent-aware monitor (0 incidents in current corpus) \\
+$L_{\mathrm{irreducible}}$ & 1.00 & not rejectable without infra/trust-base information (7 incidents) \\
+\midrule
+$L_{\mathrm{aggregate}}$ & 5.97 & total aggregate loss (53 incidents) \\
+\bottomrule
+\end{tabular}
+\caption{Unified loss ledger. The observation-set decomposition (rows 1--4) is exhaustive and disjoint; row sums to the aggregate. The earlier binary model's \$0.34B ``ambiguous'' bucket (Table~\ref{tab:basis-obs}) corresponds to monitor-design-dependent edge cases now distributed across $\Omega_{\mathrm{config}}$ depending on which configuration facts the monitor reads; we treat ambiguous as a sensitivity overlay rather than a headline category.}\label{tab:loss-ledger}
+\end{table}
+
+The headline loss-prevention story rephrased against the observation-set model: with chain-only monitoring a sound gate prevents up to \$3.60B; extending to declared-configuration monitoring brings the preventable loss to \$4.97B; the residual \$1.00B requires information outside any of the monitor classes considered in this paper. The earlier $L_{\mathrm{basis}} = \$4.01\text{B}$, $L_{\mathrm{unobs+amb}} = \$1.96\text{B}$ split of Proposition~\ref{prop:loss-ceiling} (Table~\ref{tab:loss-ceiling}) is the same data under coarser binning, with \$0.96B of what the binary model called ``unobservable + ambiguous'' becoming reachable at $\Omega_{\mathrm{config}}$ under the refined model. Table~\ref{tab:loss-ledger} is the canonical reference.
+
+\section{The Walkaway Property}\label{sec:walkaway}
+
+The economic-security analysis of Section~\ref{sec:economic} bounds adversary cost-to-attack but leaves open a structural question: \emph{what does it mean for a DeFi protocol to operate without continued action by its founders?} Industry vocabulary uses the terms ``decentralized,'' ``trustless,'' and ``immutable'' interchangeably, but these terms are not formal predicates over protocol artifacts. In this section we define the \emph{walkaway property} as a falsifiable predicate, present a five-level classification, and prove four supporting theorems.
+
+\subsection{Definition and motivation}
+
+Industry vocabulary mixes two distinct concerns. The first is whether the protocol's bytecode is on chain (which all deployed contracts are). The second is whether the protocol's continued operation requires action by any specific party. We formalize the second.
+
+\begin{definition}[Walkaway property]\label{def:walkaway}
+A deployed DeFi protocol $P$ satisfies the \emph{full walkaway property} iff every obligation $A_i \in \{A1,\dots,A5\}$ in the protocol's certified obligation set is preserved under the operational scenario in which every off-chain party associated with $P$ ceases to act. Symbolically, writing $\mathrm{Adm}(P)$ for the set of off-chain parties holding any privileged role in $P$,
+\[
+\mathrm{Walkaway}_{\mathrm{full}}(P) \;\equiv\; \forall A_i \in \mathrm{Obl}(P).\ \forall \sigma.\ \mathrm{Adm}(P)\text{-quiescent}(\sigma) \implies \models_\sigma A_i.
+\]
+\end{definition}
+
+The definition is structural: it does not invoke ``decentralization'' as a primitive. A protocol with an admin key that can pause withdrawals does not satisfy $\mathrm{Walkaway}_{\mathrm{full}}$, because in the admin-quiescent scenario, withdrawals remain paused and A1 (value conservation, for users) fails on the relevant transition class. A protocol with an upgrade proxy does not satisfy $\mathrm{Walkaway}_{\mathrm{full}}$ for the same reason.
+
+\subsection{Five-level classification}
+
+A binary walkaway predicate would be too coarse for real protocols. We define five classes.
+
+\begin{definition}[Walkaway class spectrum]\label{def:walkaway-spectrum}
+A protocol $P$ admits exactly one of the following \emph{walkaway classifications}:
+\begin{itemize}
+  \item \textbf{Full} --- $\mathrm{Walkaway}_{\mathrm{full}}(P)$ holds. No off-chain party retains an irreplaceable role in any obligation's continued satisfaction.
+  \item \textbf{Bounded} --- $\mathrm{Walkaway}_{\mathrm{full}}(P)$ fails only for liveness-class obligations; safety-class obligations all hold under admin quiescence. The protocol's continued operation depends on off-chain infrastructure (e.g., validator set, oracle relayer), but no off-chain party can extract value from quiescent users.
+  \item \textbf{Partial} --- some safety-class obligations are admin-preserved but the admin set has a structural exit (e.g., timelock with bounded delay).
+  \item \textbf{Centralized} --- an off-chain party retains the structural ability to violate a safety-class obligation indefinitely.
+  \item \textbf{Fake} --- the protocol presents the appearance of walkaway (e.g., ``immutable contract,'' ``ownership renounced'') but a residual off-chain role exists that admits safety-class obligation violation (e.g., a proxy whose admin slot was nominally renounced but is reachable via an alternative pathway).
+\end{itemize}
+\end{definition}
+
+The last class is significant. Inspection by structural pattern alone (does the contract have an \texttt{owner()} slot? does it have a proxy?) is insufficient for high-stakes use, because the absence of overt admin patterns does not preclude latent off-chain control. The classification must be assigned by inspection of the obligation-satisfaction trace under quiescence, not by surface structural heuristic.
+
+\subsection{Mechanized theorems}
+
+We mechanize five supporting results in Lean~4 (see file \texttt{lean/Parallax5/Walkaway.lean}; 340 lines, 5 theorems, 3 examples, 11 definitions, 3 structures, 2 inductives; zero \texttt{sorry}).
+
+\begin{theorem}[Empty-admin walkaway is trivial]\label{thm:walkaway-empty}
+If $\mathrm{Adm}(P) = \emptyset$, then $\mathrm{Walkaway}_{\mathrm{full}}(P)$ holds.
+\end{theorem}
+
+\begin{theorem}[Admin removal preserves obligations]\label{thm:admin-removal}
+For any obligation $A_i$ whose satisfaction does not reference $\mathrm{Adm}(P)$, removing parties from $\mathrm{Adm}(P)$ preserves $\models A_i$.
+\end{theorem}
+
+\begin{theorem}[Bounded walkaway eventual stability]\label{thm:bounded-eventual}
+Under a bounded-delay timelock with delay $\tau$, after time $t > \tau$ following the last admin action, the protocol's safety-class obligations hold under admin quiescence.
+\end{theorem}
+
+\begin{theorem}[Centralized exclusion]\label{thm:centralized-excluded}
+If $\exists A_i \in \mathrm{Obl}(P)$ such that $A_i$ admits a violation under any single-party action by an element of $\mathrm{Adm}(P)$, then $\mathrm{Walkaway}_{\mathrm{full}}(P)$ does not hold.
+\end{theorem}
+
+\begin{theorem}[Minimal admin-free CPMM is full walkaway]\label{thm:cpmm-walkaway}
+A constant-product AMM with no factory, no protocol-fee switch, and no admin role has $\mathrm{Adm}(P) = \emptyset$ on its full obligation set and therefore satisfies $\mathrm{Walkaway}_{\mathrm{full}}$. This is the substrate's cleanest positive example: full walkaway holds because no privileged role exists to remove.
+\end{theorem}
+
+\begin{theorem}[Uniswap V3 Core pool admits full walkaway under scoped obligations]\label{thm:uniswap-walkaway}
+A deployed Uniswap V3 Core pool, scoped to its swap/mint/burn entry points and excluding the factory-level protocol-fee switch, has $\mathrm{Adm}(P) = \emptyset$ on the scoped obligation set $\{A1, A2, A4\}$ and therefore satisfies $\mathrm{Walkaway}_{\mathrm{full}}$ under that scope.
+\end{theorem}
+
+Theorems~\ref{thm:cpmm-walkaway} and~\ref{thm:uniswap-walkaway} are worked positive examples, verified by mechanical check that the relevant deployed bytecode has no admin slot reachable from any function selector with state-mutating effect on the obligations in scope. The two theorems differ in their scoping discipline: the minimal CPMM is admin-free by construction (no factory, no protocol fee), so its walkaway claim is unrestricted. Uniswap V3 Core, by contrast, has a factory-level protocol-fee switch controlled by governance; the scoped theorem here applies to \emph{pool-level safety only}, declaring factory-level commercial parameters out of scope. Protocols that wish to publish a Uniswap-V3-style walkaway certificate must declare their scope explicitly in the certificate's \texttt{walkaway.scope} field. Hostile reviewers should challenge the scoping, not the theorem; the scoping is the substantive claim, and the substrate prefers narrow honest claims over broad informal ones.
+
+\subsection{Relation to existing terminology}
+
+The walkaway property is strictly weaker than ``fully autonomous'' (which would require liveness-class obligations also to hold under quiescence, which is impossible for any protocol depending on external information or coordination) and strictly stronger than ``no admin functions in the visible ABI'' (which does not preclude proxy-mediated admin access). It is the right level of structure to make claims about founder-independent operation falsifiable. A protocol's walkaway classification is one of the certificate fields specified in Section~\ref{sec:cert-schema}.
+
+\section{2026 Forward-Test}\label{sec:forward-test}
+
+The empirical catalog (53 incidents, 2016--2026) used to define the framework risks overfitting: it is possible that classification choices were made in hindsight. To test predictive validity, we applied PARALLAX-5 to 13 additional 2026 incidents that were not in the catalog at the time of v3 framework definition, totaling \$725.7M in losses. The obligation schema and basis predicates were frozen prior to classification of these incidents; classification was performed without modifying the basis. We emphasize that the attack vectors were public at classification time, so this is a schema-stability test rather than a prediction-of-attack test. A refutation requires a trust-base-respecting, loss-inducing transition that satisfies all five obligations. None of the 13 incidents constitutes a refutation.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+& Confirmed & Partial & Refuted & Pending \\
+\midrule
+Count   & 13 & 0 & \textbf{0} & 0 \\
+Loss \$M & 725.7 & 0.0 & \textbf{0.0} & 0.0 \\
+\bottomrule
+\end{tabular}
+\caption{Forward-test of 13 2026 incidents. Zero refutations: no incident was a basis-respecting, trust-base-respecting loss. Note that this is a \emph{schema-stability test}, not a prediction-of-attack test: the attack vectors were public at classification time, but the obligation schema was frozen before classification. The result establishes that the schema remained adequate without modification under thirteen subsequent incidents.}\label{tab:forward-test}
+\end{table}
+
+The CoW Swap DNS hijack ($\$1.2$M, April 2026) correctly classifies as basis-unobservable: victims signed legitimate transactions on a hijacked frontend, and the basis cannot distinguish their intent. This validates the L\_basis-unobservable category as bounded and well-defined — the boundary cuts where we said it would. All other 2026 incidents are basis-observable, including the two largest (Kelp DAO \$292M and Drift Protocol \$285M), confirming that the framework's reach extends to fresh, post-hoc-classification-free incidents.
+
+The 2026 obligation frequency ($A_2$: 7, $A_5$: 6, $A_1$: 4, $A_4$: 0, $A_3$: 0) matches the 2024--2025 distribution: authorization (key compromise) and external-attestation (bridge / oracle) dominate; pure reentrancy and pure signature forgery are increasingly rare. The full data is at \texttt{parallax/formal/forward\_test/forward\_2026.py}.
+
+\section{PARALLAX-5 as a Unification Layer}\label{sec:unification}
+
+The smart-contract security tooling ecosystem is fragmented. Slither~\cite{slither} produces hundreds of detector verdicts in syntactic format; Mythril~\cite{mythril} and halmos~\cite{halmos} produce symbolic counter-examples; Certora~\cite{certora} produces rule-level UNSAT/SAT verdicts; Lean and Coq produce theorem-level proof artifacts; auditor reports use a narrative format. There is no common interface. A protocol team adopting all five gets five incompatible reports with no shared vocabulary.
+
+PARALLAX-5 is designed as a \emph{coordination layer} for these tools, not a competitor to any of them. The five obligations $A_1, \ldots, A_5$ provide a fixed common vocabulary; every existing tool maps into specific obligations and specific compliance levels.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+Tool & Role in PARALLAX-5 & Compliance level produced \\
+\midrule
+Slither & Static detectors emit obligation hints & P2 (Statically Screened) \\
+Mythril, Manticore & Bounded symbolic exploration & P3 (Symbolically Checked) \\
+halmos & Foundry-integrated EVM bytecode symbolic execution & P3 \\
+Certora & Rule-level SMT proofs over CVL specifications & P4 (Formally Proved) \\
+Coq, Lean & Theorem-level meta-proofs & P4 \\
+KEVM~\cite{kevm} & K-framework operational semantics & P4 over the EVM \\
+PARALLAX runtime gate & Step-secure execution-time enforcement & P5 (Runtime Enforced) \\
+Auditor narrative & Maps each finding to $\sigma(t)$ & augments any level \\
+\bottomrule
+\end{tabular}
+\caption{PARALLAX-5 as coordination layer. Each existing tool maps cleanly into one or more obligations and a specific compliance level. No tool is displaced; outputs compose.}\label{tab:tool-coordination}
+\end{table}
+
+The contribution is not better detection but \emph{better organization}. The certificate format (Section~\ref{sec:standards}) provides a single artifact where verdicts from heterogeneous tools compose by obligation; the validator (\texttt{parallax/standard/validator.py}) checks that they compose consistently. A protocol that runs Slither + Certora + halmos and a runtime gate produces a single P5 certificate referencing all four tools' artifact hashes.
+
+This positioning matters for adoption: PARALLAX-5 does not ask any tool vendor or auditor to abandon their stack; it asks them to label outputs by obligation. Tool vendors gain interoperability; auditors gain a structured report format; protocols gain a single artifact; insurers gain a comparable rating; AI-agent platforms gain a uniform execution-time gate. All five constituencies benefit without anyone losing.
+
+\section{The PARALLAX-CROPS Trust-Surface Vector}\label{sec:crops}
+
+The depth scale $D_0,\dots,D_5$ of Section~\ref{sec:axioms} produces a single security rating per obligation. For a consumer who wants to know ``how strong is this protocol's signature handling,'' or ``does this AMM have any meaningful censorship-resistance,'' a single scalar is insufficient. In this section we define a five-component trust-surface vector and prove its derivation from the obligation-coverage data.
+
+\paragraph{Relation to the Ethereum Foundation's CROPS.} The Ethereum Foundation's 2026 strategic communications use \emph{CROPS} as a mnemonic for ``censorship-resistant, open source, private, secure'' --- four values stated as ecosystem-level priorities. We use \emph{PARALLAX-CROPS} as the name for our five-component refinement, which expands \emph{capture-resistance} into a separate dimension $R$ distinct from \emph{censorship-resistance} $C$. The two are related (a captured protocol can censor its users) but not identical, and the substrate's walkaway property feeds the $R$ dimension uniquely. We label our vector \emph{PARALLAX-CROPS} to make this refinement explicit and to avoid the appearance of citing the EF mnemonic as a five-letter acronym.
+
+\subsection{The five dimensions}
+
+\begin{definition}[CROPS dimensions]\label{def:crops}
+A protocol's \emph{CROPS vector} is the tuple $(C, R, O, P, S) \in D^5$ where each component is a depth in the $D_0,\dots,D_5$ scale:
+\begin{itemize}
+  \item $C$ --- \emph{Censorship-resistance.} The protocol's resistance to value flow being blocked or redirected by external parties.
+  \item $R$ --- \emph{capture-Resistance.} The protocol's resistance to off-chain parties acquiring or retaining unilateral control over its operation.
+  \item $O$ --- \emph{Openness.} The accessibility of the protocol's source, specification, and operational artifacts to external review.
+  \item $P$ --- \emph{Privacy.} The protocol's preservation of user information against external observation (transaction-graph privacy, signature non-malleability, oracle-input privacy).
+  \item $S$ --- \emph{Security.} The aggregate strength of the protocol's safety properties, summarizing across all obligations.
+\end{itemize}
+\end{definition}
+
+These five dimensions are not chosen arbitrarily: they correspond exactly to the technical priorities articulated for Ethereum's longevity-over-breadth phase, in which security and capture-resistance are co-equal with throughput considerations rather than subordinate to them.
+
+\subsection{The contribution matrix}
+
+Each obligation $A_1,\dots,A_5$ contributes to a specific subset of CROPS dimensions. The matrix is sparse and conservative: an obligation contributes to a dimension only when the obligation's satisfaction is a necessary condition for that dimension to be meaningful at any depth $\ge D_1$.
+
+\begin{definition}[Contribution matrix]\label{def:contribution-matrix}
+The contribution function $\mathrm{contrib}: \{A_1,\dots,A_5\} \to \mathcal{P}(\{C,R,O,P,S\})$ is defined by:
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+& $C$ & $R$ & $O$ & $P$ & $S$ \\
+\midrule
+$A_1$ value conservation         & \checkmark & --        & --        & --        & \checkmark \\
+$A_2$ authorization closure      & --        & \checkmark & --        & --        & \checkmark \\
+$A_3$ signature integrity        & --        & --        & --        & --        & \checkmark \\
+$A_4$ temporal distinctness      & \checkmark & --        & --        & --        & \checkmark \\
+$A_5$ external-attestation trust & \checkmark & --        & \checkmark & --        & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{definition}
+
+\paragraph{On the privacy contribution of $A_3$.} $A_3$ does not contribute to $P$ in the matrix above. Signature malleability is an integrity, replay, and canonicalization issue; the privacy-adjacent consequence (cross-message identity correlation by an attacker) is real but conditional on the protocol making an explicit privacy claim via signature canonicalization (ring signatures, blinded signatures, selective disclosure). Honest PARALLAX-CROPS reporting requires that privacy contributions flow from explicit privacy primitives declared in the specification, not from incidental properties of $A_3$ evidence. Protocols whose $A_3$ enforcement is part of a privacy-primitive design should declare \texttt{privacy\_primitives\_depth} accordingly.
+
+\noindent Three derived dimensions extend the matrix beyond per-obligation contributions:
+\begin{itemize}
+  \item The \textbf{walkaway classification} contributes to $R$ via $\mathrm{depthOfWalkaway}(\mathrm{class}) \in \{0,1,3,4,5\}$ for $\{\text{fake},\text{centralized},\text{partial},\text{bounded},\text{full}\}$ respectively.
+  \item The \textbf{source-openness depth} (whether the contract source, build inputs, and deployment metadata are publicly available and reproducible) contributes directly to $O$.
+  \item \textbf{Privacy-primitives depth} (whether the protocol uses signature blinding, mixers, ZK commitments, or other privacy-enhancing primitives at the obligation-satisfaction layer) contributes \emph{as the sole source of} $P$.
+\end{itemize}
+
+\subsection{Projection function}
+
+\begin{definition}[CROPS projection]\label{def:crops-projection}
+For a protocol $P$ with obligation depth assignment $d : \{A_1,\dots,A_5\} \to D$, walkaway classification $w$, source-openness depth $o$, and privacy-primitives depth $\pi$, the CROPS vector is computed by maximum over contributors:
+\[
+\mathrm{CROPS}(P) = \big(\max_{A_i : C \in \mathrm{contrib}(A_i)} d(A_i),\ \max_{A_i : R \in \mathrm{contrib}(A_i)}\!\!\!\!\!\!\!\! \{d(A_i)\} \cup \{\mathrm{depthOfWalkaway}(w)\},\ \ldots\big).
+\]
+\end{definition}
+
+The projection is monotone: increasing any obligation depth or upgrading the walkaway classification can only weakly increase the CROPS vector. This monotonicity is the multi-dimensional analogue of Theorem~\ref{thm:certificate-monotonicity}.
+
+\subsection{Uniswap V3 Core}
+
+Applying Definition~\ref{def:crops-projection} to the obligation-depth data of Theorem~\ref{thm:uniswap-walkaway} (which gives $d(A_1)=D_4$ via static and symbolic execution, $d(A_2)=D_5$ via empty-admin verification, $d(A_4)=D_4$ via reentrancy analysis, and walkaway class full $\Rightarrow R=D_5$, with source openness $D_5$ because the repository, build inputs, and deployment metadata are public and reproducible, and privacy primitives $D_0$ because Uniswap V3 makes no privacy claims), we obtain:
+\[
+\mathrm{CROPS}(\text{Uniswap V3 Core}) = (C{=}4,\ R{=}5,\ O{=}5,\ P{=}0,\ S{=}5).
+\]
+Two features of this result deserve comment. First, $P=0$ is not a defect but an honest reporting: Uniswap V3 makes no privacy claims, and the certificate reflects this rather than inflating the rating. Second, the achievement of $R=D_5$ depends on the walkaway property being verified rather than asserted, which is the content of Section~\ref{sec:walkaway}.
+
+\subsection{Consumer-side policy semantics}
+
+A PARALLAX-CROPS vector enables policy-based filtering at the consumer side. A treasury policy might require $C \ge 3$ and $R \ge 4$ and $S \ge 4$ for any pool the treasury allocates to; a privacy-seeking user might require $P \ge 3$. These policies are uniform predicates over the CROPS vector and can be evaluated mechanically against certificates without bespoke per-protocol diligence. The executable specification is provided in \texttt{src/parallax5\_coordinator/crops.py}; the 19-test suite (\texttt{tests/test\_crops.py}) covers contribution-matrix consistency, the v1.0.1 invariant that $A_3$ does not inflate $P$, the projection function's monotonicity, and consumer-policy worked examples.
+
+\section{Worked Examples}\label{sec:case-studies}
+
+Three worked examples accompany this paper, each fully reproducible from a single command (\texttt{make demo-vault}, \texttt{make demo-bridge}, \texttt{make demo-agent}) and consisting of: deliberately-vulnerable source contracts, a faithful Python state-machine simulator demonstrating the attack, patched source contracts, a Lean~4 proof artifact for the patched version, a PARALLAX-5 certificate emitted by the coordinator, a validated certificate, and a registry-submission payload. All four Lean files involved in this section contain zero \texttt{sorry}.
+
+\subsection{The ERC-4626 inflation attack}\label{ssec:demo-vault}
+
+A well-documented exploit on naive ERC-4626 vaults: an attacker deposits a single wei, then directly transfers a large asset balance to the vault address (bypassing the deposit accounting), inflating the share price to the point where subsequent victim deposits round down to zero shares. The victim's assets become recoverable by the attacker via redemption of their original single share.
+
+The mitigation is the virtual-shares pattern introduced in OpenZeppelin v4.8: \texttt{convertToShares} uses $(\mathit{assets} \times (\mathit{totalSupply} + V_{\mathrm{sh}})) / (\mathit{totalAssets} + V_{\mathrm{as}})$ with $V_{\mathrm{sh}} = 10^6$ and $V_{\mathrm{as}} = 1$. The virtual offset ensures the rounding always favors the vault.
+
+The Lean~4 file \texttt{demos/vault/proof/Conservation.lean} (196 lines, 5 theorems, 0 \texttt{sorry}) establishes a formal cost lower bound:
+\begin{theorem}[Inflation-attack cost lower bound]\label{thm:inflation-bound}
+For the patched vault $V$ and any nonzero deposit amount $a > 0$, if $\mathrm{convertToShares}(V, a) = 0$, then
+\[
+V.\mathit{totalAssets} + V_{\mathrm{as}} \;>\; a \cdot (V.\mathit{totalShares} + V_{\mathrm{sh}}).
+\]
+\end{theorem}
+
+\noindent For a victim deposit of $10^{18}$ wei, an attacker wishing to force zero-share rounding must inflate $V.\mathit{totalAssets}$ to at least $10^{24}$ wei: economically infeasible for any realistic ERC-20. The Python simulator confirms this mechanically: on the vulnerable version, an attacker captures $10^{18}$ wei; on the patched version, the victim's economic loss is bounded at $2.5 \times 10^{-7}$ (roundoff only).
+
+\paragraph{Certificate.} The emitted certificate has CROPS vector $(C{=}4, R{=}5, O{=}5, P{=}0, S{=}4)$ with walkaway classification \emph{full}. Slither finds seven static issues on the vulnerable version and five on the patched (the two missing are \texttt{incorrect-equality} checks removed by the virtual-shares fix), but \emph{neither set identifies the inflation attack itself}: the A1 depth of $D_4$ on the patched version comes from the Lean proof, not from Slither. This is the substrate's central claim demonstrated concretely: static analysis is necessary but not sufficient for D4 evidence; the certificate composes the heterogeneous evidence honestly.
+
+\subsection{Bridge attestation}\label{ssec:demo-bridge}
+
+Cross-chain bridges have produced the largest single losses in DeFi: Wormhole (\$320M, 2022), Ronin (\$625M, 2022), Nomad (\$190M, 2022), Multichain (\$126M, 2023). The common failure mode is attestation-validation failure: the bridge accepts attestations it should not have accepted. We address two vector classes.
+
+\emph{Signature malleability} (A3). Pre-EIP-2 ECDSA admits two valid signatures $(r,s)$ and $(r, n-s)$ for the same message and public key. A bridge that uses \texttt{ecrecover} without enforcing $s \le n/2$ accepts both. The mitigation is a single check: \texttt{require(uint256(s) <= uint256(SECP256K1N\_DIV\_2), "high-s rejected")}.
+
+\emph{Stale-attestation acceptance} (A5). A bridge with no freshness window accepts old attestations indefinitely, even after the validator set has rotated due to a discovered compromise. The mitigation combines (i)~a freshness window (e.g., one hour) and (ii)~an epoch-binding message hash that incorporates the current validator set version.
+
+The Lean~4 file \texttt{demos/bridge/proof/Attestation.lean} (193 lines, 6 theorems, 0 \texttt{sorry}) establishes:
+\begin{theorem}[Patched bridge rejects malleable, stale, and future attestations]\label{thm:bridge-rejects}
+Let $\mathrm{patchedBridgeAccepts}(att, t, \sigma, v) \equiv \mathrm{isFresh}(att, t) \wedge \mathrm{isLowS}(\sigma) \wedge v$. Then for any signature $\sigma$ and any attestation $att$ at time $t$, if either $\neg \mathrm{isLowS}(\sigma)$ or $\neg \mathrm{isFresh}(att, t)$, then $\neg \mathrm{patchedBridgeAccepts}(att, t, \sigma, v)$.
+\end{theorem}
+
+\noindent Together with the epoch-rotation lemma (\texttt{epoch\_rotation\_breaks\_replay}), this theorem rules out the malleability, stale, future, and rotated-epoch replay families.
+
+\paragraph{Certificate.} The bridge's PARALLAX-CROPS vector is $(C{=}4, R{=}4, O{=}5, P{=}0, S{=}4)$ with walkaway classification \emph{bounded}. Two features deserve comment. First, $R = 4$ rather than $5$: a bridge's purpose is to relay attestations from off-chain validator infrastructure, so the bridge cannot achieve full walkaway by structure; its bounded classification, with \texttt{dependencies\_disclosed} enumerating ``off-chain validator infrastructure must continue to attest withdrawals,'' is the honest reporting. Second, $P = 0$ reflects the bridge making no privacy claim. Although the patched bridge enforces low-s ECDSA (which has a privacy-adjacent consequence in the form of cross-message identity correlation by an attacker), the v1.0.1 contribution matrix does not inflate $P$ from $A_3$ evidence alone: privacy contributions flow only from explicit privacy primitives declared in the spec. A bridge using $A_3$ as part of a privacy-primitive design (e.g., a ring-signature attestation scheme) would declare \texttt{privacy\_primitives\_depth} and earn a non-zero $P$.
+
+\subsection{An AI-agent runtime gate}\label{ssec:demo-agent}
+
+The third demonstration addresses a class the industry is just beginning to confront at scale: AI agents with on-chain authority. The architectural setting: an autonomous agent (yield manager, treasury rebalancer) is given a private key authorizing it to interact with a vault. Without further structure, every transaction the agent emits is at the user's risk, with no mitigation available short of revoking the agent's authority entirely.
+
+The runtime gate $G$ is a contract sitting between the agent and the target vault. Every agent action $a$ is routed through $G$, which evaluates a \emph{step-secure predicate} $\sigma(s, a)$ over the current vault state $s$ and the candidate action; only actions satisfying $\sigma$ are forwarded. The predicate enforced by the demonstration's gate consists of (i)~a per-transaction outflow cap (5\% of vault balance), (ii)~a 24-hour rolling outflow budget (20\% of vault balance), (iii)~a whitelist of approval targets, set at construction and immutable, (iv)~an approval-amount bound.
+
+The Lean~4 file \texttt{demos/agent\_gate/proof/Containment.lean} (261 lines, four substantive theorems, 0 \texttt{sorry}) establishes:
+
+\begin{theorem}[Single-step containment]\label{thm:single-step-containment}
+For any policy $\Pi$, any vault state $s$, and any agent action $a$, either $\mathrm{gateStep}(\Pi, s, a) = \mathrm{applyAction}(s, a)$ and $\sigma(\Pi, s, a) = \mathrm{true}$, or $\mathrm{gateStep}(\Pi, s, a) = s$ and $\sigma(\Pi, s, a) = \mathrm{false}$. There is no third possibility.
+\end{theorem}
+
+\begin{theorem}[AI-Agent Containment]\label{thm:ai-containment}
+For any policy $\Pi$, any state $s$, and any agent action $a$, if the gate's transition $\mathrm{gateStep}(\Pi, s, a)$ produces a state distinct from $s$ (i.e., the action was applied), then: every transfer's amount is bounded by $\Pi.\mathrm{maxOutflowPercent} \cdot s.\mathit{balance} / 100$; every approve targets a $\Pi$-whitelisted spender; every approve amount is bounded by $\Pi.\mathrm{maxApproval}$.
+\end{theorem}
+
+The significance of Theorem~\ref{thm:ai-containment} is that its hypothesis quantifies over $a$ \emph{abstractly}: the theorem makes no assumption about the agent's origin (a human, a language model, a jailbroken language model, an external party in possession of the agent's private key, a hallucinated tool call). The gate's guarantees hold over agent-behavior space, not over agent-intent space. This is the formal expression of ``the runtime gate makes the agent's transaction surface safe even under arbitrary adversarial agent behavior.''
+
+\paragraph{Certificate.} The runtime gate's CROPS vector is $(C{=}5, R{=}5, O{=}5, P{=}0, S{=}5)$ with walkaway classification \emph{bounded}. This is the only certificate in the demo set to reach $D_5$ on any obligation. The $D_5$ assignment is precise: the certified step-secure predicate is enforced at runtime on every submitted action by the deployed gate, with the proof artifact (Theorem~\ref{thm:ai-containment}) establishing the predicate's containment property and the deployed relay supplying enforcement. Deployment is therefore not itself the proof---a deployed gate can be buggy, misconfigured, or bypassed---but \emph{deployment is the enforcement mechanism whose correctness the proof artifact certifies}. The Python simulator demonstrates this mechanically across five scenarios (legitimate rebalance permitted; max-uint approval to non-whitelisted contract rejected; 100\% single-transfer drain rejected; repeated 5\%-cap drains bounded by daily budget; non-whitelisted approval rejected), each behaving as predicted.
+
+\subsection{What the demos jointly show}
+
+Each demo's certificate composes heterogeneous evidence (Slither static findings, Lean theorems, walkaway classification, source-openness declaration) under the single 19-field schema specified in Section~\ref{sec:cert-schema}. The CROPS vectors differ across the three protocols in ways that reflect their actual structural properties, not in ways that reflect marketing framing. The substrate's vocabulary (A1--A5, D0--D5, the five walkaway classes, the CROPS dimensions) is sufficient to describe protocols across three distinct categories (vault, bridge, agent runtime) without extension.
+
+
+
+\section{Comparison with Existing Standards}\label{sec:standards}
+
+PARALLAX-5 is designed to coordinate with, not displace, existing standards. The full mapping is at \texttt{paper/STANDARDS\_COMPARISON.md}; in brief:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+Standard & Scope & PARALLAX-5 mapping \\
+\midrule
+EEA EthTrust [S]/[M]/[Q] & Solidity & $\approx$ P1 / P2 / P3 \\
+OWASP SCSVS V1--V13 & Solidity & Each chapter clusters under A1--A5 or OA1--OA3 \\
+ToB / OpenZeppelin / Consensys & Multi-VM & Findings tag with A1--A5 \\
+NIST SP 800-zzz (draft) & DLT & Aligns with OA1/OA2/OA3 trust-base \\
+Immunefi / Code4rena severity & Per-finding & Severity $\leftrightarrow$ obligation violation strength \\
+\bottomrule
+\end{tabular}
+\caption{Mapping of existing standards onto PARALLAX-5. Each is unchanged; PARALLAX-5 provides the per-obligation labeling layer they lack.}\label{tab:standards}
+\end{table}
+
+
+
+\subsection{Standard Infrastructure}\label{sec:ops}
+
+The standard infrastructure is implemented as operational code rather than documentation:
+
+\paragraph{Falsification challenge as CLI.}
+The basis counterexample challenge (\texttt{paper/FALSIFICATION\_\allowbreak CHALLENGE.md}) is operationalized by \texttt{parallax5 challenge validate}, which structurally verifies submissions: the trust base must hold, all five obligations must be claimed satisfied, and protected-value loss must be demonstrated. Submissions failing these checks are rejected as not-refuting (basis hits, not basis misses) with a documented reason. An append-only \texttt{parallax5 challenge status} registry tracks submissions across the campaign.
+
+\paragraph{Revocation registry.}
+Certificate lifecycle events (\texttt{parallax/standard/revocation.py}) are recorded in an append-only JSONL log with cryptographic content-addressing of the certificate. The events --- \texttt{issue}, \texttt{revoke}, \texttt{supersede}, \texttt{revalidate} --- are immutable; the registry exposes \texttt{is\_revoked}, \texttt{is\_superseded}, and \texttt{status} for downstream consumers (insurers, CI workflows). Production deployments would back this with on-chain Merkle accumulators for tamper-evidence.
+
+\paragraph{Audit-to-certificate conversion.}
+\texttt{parallax5 audit-import} converts narrative or structured audit outputs into PARALLAX-5 certificates. Three input formats are supported out of the box: structured per-finding JSON (\texttt{parallax-audit-v1}), SARIF~2.1.0 (the GitHub-compatible static-analyzer format), and native Slither JSON. The converter classifies findings to obligations via keyword analysis, determines a compliance level from severity and tool diversity, and emits a certificate that validates against the schema. A worked end-to-end round-trip from a Trail-of-Bits-style report to a validated certificate is included as a fire test.
+
+\paragraph{Pre-transaction simulator.}
+\texttt{parallax5 pretx-simulate} dry-runs the step-secure gate semantics on a candidate transition (sender, target, calldata, value, call depth, oracle context) and emits per-obligation accept/reject with reasons. This is the kernel of the P5 runtime gate experience: every proposed transaction is adjudicated against the certificate's basis before signing. The reference implementation is in Python; production deployments would re-implement the same semantics in Solidity, Move, and Solana SBPF, with the Python version serving as the conformance oracle.
+
+Together these four pieces transform the standard from documentation into a usable substrate. Each component is exercised by at least one fire test; integration round-trips are verified as part of the self-test.
+
+
+
+\section{The EVM Backend}\label{sec:evm-backend}
+
+The substrate of \S\ref{sec:axioms}--\S\ref{sec:gates} is stated against an abstract value-bearing state machine. For its theorems to bind on deployed bytecode, the substrate must compose with a production EVM semantics. This section establishes that composition: we exhibit a typeclass-based refinement of the substrate against Nethermind's EVMYulLean\,---\,a Lean~4 executable formal model of the Ethereum Virtual Machine and Yul intermediate language at the Cancun hard fork\,---\,and report a mechanically-checked instance lifting nineteen of our abstract refinement theorems to \texttt{EvmYul.EVM.State}. The verification artifact, with full cryptographic anchoring and reproducibility evidence, is permanently deposited~\cite{duncan2026parallax5verification}.
+
+\subsection{Choice of backend}
+
+Two backends were considered. The K-Framework EVM semantics~\cite{kevm}, mature and Foundry-native through Kontrol, would require a cross-prover translation layer: K is not Lean. EVMYulLean is native Lean~4 and reports 99.99\,\% pass rate on the Ethereum Foundation conformance test suite at the Cancun fork.\footnote{Nethermind, \textit{EVMYulLean}, \url{https://github.com/NethermindEth/EVMYulLean}.} Because the substrate is itself Lean~4, EVMYulLean reduces refinement to typeclass instantiation rather than cross-prover translation; this is the path taken here. A K-Framework backend remains available as a complementary path through in-progress KEVM--Lean equivalence work.
+
+\subsection{The \texttt{EvmLikeMachine} typeclass}
+
+The typeclass \texttt{EvmLikeMachine S} (Table~\ref{tab:evm-typeclass}) captures the minimal operational interface required by the substrate's refinement layer. Six methods suffice: a step function returning an optional successor state, two value-tracking projections (\texttt{totalSupply}, \texttt{balanceOf}), a sender projection for $A_2$, a depth projection for $A_4$, and a freshness oracle adapter for $A_5$.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Method & Obligation served \\
+\midrule
+\texttt{step : S $\to$ Option S}                            & step semantics (all) \\
+\texttt{totalSupply : S $\to$ Nat}                          & $A_1$ value conservation \\
+\texttt{balanceOf : S $\to$ Address $\to$ Nat}              & $A_1$ per-account \\
+\texttt{sender : S $\to$ Address}                           & $A_2$ authorization \\
+\texttt{callDepth : S $\to$ Nat}                            & $A_4$ temporal distinctness \\
+\texttt{attestationFresh : S $\to$ Address $\to$ Nat $\to$ Bool} & $A_5$ external attestation \\
+\bottomrule
+\end{tabular}
+\caption{The \texttt{EvmLikeMachine} interface. Any EVM-shaped semantics exposing these operations may be registered as an instance; every parametric theorem of the abstract refinement layer (\S\ref{sec:gates}) then lifts to the concrete state type by typeclass elaboration, with correctness enforced by the Lean~4 kernel.}\label{tab:evm-typeclass}
+\end{table}
+
+\subsection{The refinement theorem and its instantiation}
+
+We state the central result of this section, then sketch the proof constructively from the deposited artifact.
+
+\begin{theorem}[EVMYulLean refinement]\label{thm:evmyul-refinement}
+Let $\mathcal{R}$ denote the abstract refinement layer of \S\ref{sec:gates}\,---\,the set of nineteen Lean~4 theorems stated parametrically over a type $S$ equipped with $[\texttt{EvmLikeMachine}\ S]$ and a gate $(g : \texttt{AbstractGate}\ S)$. There exists an instance $\texttt{EvmLikeMachine}\ (\texttt{EvmYul.EVM.State})$ under which every theorem of $\mathcal{R}$ lifts to a compiled Lean~4 proof term over \texttt{EvmYul.EVM.State}. Five further theorems are exhibited over concrete default-constructed values of this type, demonstrating non-vacuity of the lifted set.
+\end{theorem}
+
+\begin{proof}[Proof (constructive, externally verifiable)]
+The instance is provided in the deposited module \texttt{Instance.lean}; each of its six methods wraps the corresponding EVMYulLean projection (\S\ref{sec:evmyul-instance}). The lifted theorems are realized as twenty-four declarations in the deposited \texttt{TheoremTransfer.lean}; their compiled proof terms are persisted in \texttt{TheoremTransfer.olean}. The Lake build of the integrated module set terminates with exit code zero, which is necessary and sufficient evidence that the Lean~4 kernel has accepted every typeclass elaboration, theorem application, and proof term in the closure. The build is reproducible: three independent executions against identical upstream commits produced byte-identical compiled artifacts for the modules whose sources were unchanged (\S\ref{sec:evmyul-reproducibility}). A reader may re-verify the artifact independently by executing the included \texttt{verify\_receipt.py} script against the deposited \texttt{receipt.json}; expected output: \texttt{OVERALL:\ VALID}~\cite{duncan2026parallax5verification}.
+\end{proof}
+
+The nineteen lifted theorems partition into five families. (i) Five single-step gate-safety theorems establish rejection of transitions violating $A_2$ (unauthorized sender), $A_4$ (non-zero call depth under enabled reentrancy obligation), $A_5$ (stale oracle attestation), and $A_1$ (supply-inflating transitions), together with the soundness-trivial case of a fully-disabled gate. (ii) Seven multi-step trace-safety theorems establish that the recursion structure of the trace predicate is well-formed (zero-step base case, head extraction, tail extension, full-trace acceptance under a permissive gate, and full-trace rejection under both reentrancy and unauthorized-sender violations). (iii) Two monotonicity-and-refinement theorems establish that disabling an obligation produces a strictly more permissive gate, and that gate decisions transfer between instances under a compatible address mapping. (iv) Two decidability theorems establish total decision and determinism. (v) Three instance-non-vacuity theorems witness that the typeclass is inhabited over both abstract and concrete \texttt{EvmYul.EVM.State} values. The five concrete-state theorems extend (v) by exhibiting specific named-state instances of the trace-safety and decidability results.
+
+\subsection{The instance over \texttt{EvmYul.EVM.State}}\label{sec:evmyul-instance}
+
+The deposited \texttt{Instance.lean} (164 source lines, Lean~4.22.0) provides
+\[
+  \texttt{instance : Parallax.EvmLikeMachine EvmYul.EVM.State}
+\]
+by wrapping six EVMYulLean projections:
+
+\begin{itemize}
+\item \texttt{step} composes \texttt{EvmYul.EVM.step} with the Cancun fork's standard fuel and gas accounting, coercing $\texttt{Except}\ \tau$ to $\texttt{Option}$ by discarding the exception payload.
+\item \texttt{totalSupply} folds \texttt{Account.balance} over the persistent \texttt{AccountMap}.
+\item \texttt{balanceOf} projects \texttt{Account.balance} at a specified address.
+\item \texttt{sender} reads \texttt{ExecutionEnv.sender}.
+\item \texttt{callDepth} reads from \texttt{Substate.accessedAccounts}. This is a conservative reading; a faithful implementation requires an upstream extension to \texttt{EVM.State} adding an explicit depth counter. The conservative reading is sound for our gate-safety theorems (it can over-approximate but not under-approximate depth), which is what they require.
+\item \texttt{attestationFresh} provides an adapter slot. The deposited instance uses a conservative \texttt{attestationFresh := fun \_ \_ \_ => true} pending an upstream freshness primitive; the gate's $A_5$ obligation is consequently vacuous on this instance, a fact explicit in the lifted theorem statements.
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+Method & Status & Consequence \\
+\midrule
+\texttt{step} & faithful wrapper around \texttt{EVM.step} & OK \\
+\texttt{totalSupply} & projection (fold of \texttt{balance}) & OK if balance sum is the intended notion \\
+\texttt{balanceOf} & faithful account-balance projection & OK \\
+\texttt{sender} & faithful environment projection & OK \\
+\texttt{callDepth} & \textbf{conservative proxy} via \texttt{accessedAccounts} & $A_4$ backend is conservative, not exact \\
+\texttt{attestationFresh} & \textbf{currently a stub} returning \texttt{true} & $A_5$ backend is vacuous on this instance \\
+\bottomrule
+\end{tabular}
+\caption{EVMYulLean backend-method fidelity. The honest reporting: most methods are faithful EVM-semantics wrappers, but $A_4$ depth-counting and $A_5$ attestation freshness are not. The substrate's lifted theorems hold as stated --- the $A_4$ backend is sound but conservative (rejects more than necessary, never less), and the $A_5$ backend is vacuous (provides no $A_5$ assurance until an upstream freshness primitive lands).}\label{tab:evmyul-fidelity}
+\end{table}
+
+\paragraph{Three levels of EVMYulLean composition.} The integration's claims separate into three levels with distinct status:
+
+\begin{enumerate}
+  \item \textbf{Interface transport} (achieved): the abstract \texttt{EvmLikeMachine} typeclass admits an instance over \texttt{EvmYul.EVM.State} (Cancun fork). The 19 abstract theorems lift to compiled Lean~4 proof terms over this instance under a single instance registration. The deposit at \texttt{doi:10.5281/zenodo.20386868} certifies the lifted artifact compiles byte-identically across runs.
+  \item \textbf{Semantic fidelity} (partial): for each obligation, the projection from \texttt{EvmYul.EVM.State} to the abstract substrate is checked above. \texttt{step}, \texttt{totalSupply}, \texttt{balanceOf}, and \texttt{sender} are faithful; \texttt{callDepth} is a conservative approximation; \texttt{attestationFresh} is a stub. Semantic fidelity is partial in the sense that two backend methods do not capture their target semantics exactly.
+  \item \textbf{Contract verification} (out of scope for this paper): the lifted theorems certify that any program respecting the substrate's obligations satisfies the basis on \texttt{EvmYul.EVM.State}; they do not certify that any particular deployed bytecode respects those obligations. Verifying that a deployed contract's execution trace satisfies the basis is the contract-verification level, and is the proper subject of downstream demos (Section~\ref{sec:case-studies}) and downstream tooling.
+\end{enumerate}
+
+A dedicated API conformance verifier (\texttt{evm\_api\_conformance.py}, deposited alongside the receipt) resolves 12 of 12 (100\,\%) \texttt{EvmYul.*} identifiers referenced in \texttt{Instance.lean} against their declaration sites in EVMYulLean's source tree at the deposited commit. Schema drift in the upstream package would surface as a build failure, an unresolved API reference, or both.
+
+\subsection{Verification protocol and reproducibility}\label{sec:evmyul-reproducibility}
+
+The integration was verified on Google Colab against EVMYulLean commit \texttt{047f6307\ldots}, mathlib commit \texttt{79e94a09\ldots}, and Lean~4.22.0 (toolchain commit \texttt{ba2cbbf0\ldots}). The wall-clock duration of a single run is approximately seven minutes, of which approximately three minutes is fetching the precompiled mathlib cache from the leanprover-community content-addressed distribution. The verification was executed three independent times. Each run produced byte-identical compiled artifacts for \texttt{Refinement.olean} (SHA-256 \texttt{d2d9ba2f\ldots}) and \texttt{Instance.olean} (SHA-256 \texttt{43c026ed\ldots}). The third compiled module, \texttt{TheoremTransfer.olean}, differs across runs only when its source file is revised; under identical source inputs it reproduces byte-identically. Byte-level reproducibility under identical declared inputs is a stronger property than recompilation alone and rules out nondeterministic compilation paths as a confounder.
+
+The verification receipt (\texttt{receipt.json}) records the evidence chain in machine-readable form: input file SHA-256 hashes, dependency commit pins, build duration and exit code, compiled artifact fingerprints, API conformance verdict, theorem inventory, and provenance metadata. The receipt is self-signed with SHA-256 over a canonical JSON serialization (signature prefix \texttt{9b7bb24d\ldots}) and additionally with Ed25519 against an ephemeral keypair (public key prefix \texttt{6698bfea\ldots}). A supply-chain provenance attestation (\texttt{provenance.intoto.jsonl}) conforming to the SLSA~v1 schema~\cite{slsa-v1} is generated alongside.
+
+The complete artifact set\,---\,receipt, three \texttt{.olean} files, four source modules, dependency manifest, build log, conformance report, provenance attestation, two visualization figures, and offline verifier\,---\,is deposited at \texttt{doi:10.5281/zenodo.20386868}~\cite{duncan2026parallax5verification}. The offline verifier (\texttt{verify\_receipt.py}) reproduces both signature checks and the \texttt{.olean} fingerprint comparison; it depends only on the Python standard library and the \texttt{cryptography} package and does not require the Lean toolchain.
+
+\subsection{Scope}
+
+The result establishes refinement composition at the type and theorem-instantiation levels: the abstract refinement layer's theorems hold over \texttt{EvmYul.EVM.State} modulo the typeclass-mediated translation, with proof terms compiled by the Lean~4 kernel. The result does not establish:
+
+\begin{enumerate}
+\item Soundness of EVMYulLean's operational semantics. This is delegated to the upstream project's Ethereum conformance testing (99.99\,\% pass rate at the deposited commit).
+\item End-to-end safety of any specific deployed smart-contract bytecode. Establishing that a particular contract's behavior under \texttt{EvmYul.EVM.step} respects the basis predicate of \S\ref{sec:gates} requires producing a witness trace over that contract's bytecode; this composition layer is treated as future work and is the natural extension above the present result.
+\item A faithful implementation of $A_5$ oracle freshness. The deposited instance uses a conservative approximation pending an upstream extension to \texttt{EvmYul.EVM.State} adding an explicit freshness oracle field.
+\end{enumerate}
+
+The substrate is therefore composable with a production EVM semantics in Lean~4; the present deposit instantiates this composition. End-to-end contract verification under the basis, for any specific contract, reduces under Theorem~\ref{thm:evmyul-refinement} to producing the witness trace.
+
+\section{Compositional Verification via Obligation Mapping}\label{sec:compositional-verification}
+
+The substrate of \S\ref{sec:axioms}--\S\ref{sec:gates} and the EVMYulLean instance of \S\ref{sec:evm-backend} provide formal foundations. This section addresses the question that determines whether the foundation is useful in practice: \emph{how does PARALLAX-5 compose with the existing analyzer ecosystem to produce a defensible end-to-end certificate?}
+
+\subsection{Problem statement}
+
+Production smart-contract review combines outputs from multiple tools: static analyzers (Slither~\cite{slither}), symbolic executors (Mythril~\cite{mythril}, halmos~\cite{halmos}), proof-assistant artifacts (Certora~\cite{certora}, our own ObligationSol). These tools produce heterogeneous output formats with overlapping but non-identical scopes. A protocol commissioning a review typically receives a list of findings without a defensible \emph{joint} assessment: tool A flags reentrancy, tool B reports an arithmetic concern, tool C is silent on oracles. What does the union of these reports establish? At what compliance level? With what residual gaps? Current practice answers these questions informally, through expert interpretation. We propose to formalize the answer.
+
+\subsection{Coverage as a graded function}
+
+We model each tool's capability as a function from obligation to evidence depth on a six-level monotone ladder:
+
+\begin{definition}[Evidence depth]\label{def:depth}
+The \emph{depth} of evidence for an obligation is one of:
+$\;0\;$ (no coverage),
+$\;1\;$ (mention; code-location report, comment-grade),
+$\;2\;$ (static-detector; pattern match flagged),
+$\;3\;$ (symbolic-path; path-condition witness exhibited),
+$\;4\;$ (formal-property; invariant verified by symbolic / bounded model checker), or
+$\;5\;$ (machine-theorem; kernel-accepted theorem in an interactive prover).
+Depth is monotone: a depth-$k$ claim subsumes the corresponding depth-$j$ claim for $j \leq k$.
+\end{definition}
+
+\begin{definition}[Tool capability]\label{def:capability}
+The \emph{capability} of a tool $t$ is a function $c_t : \{A_1, \ldots, A_5\} \to \{0, \ldots, 5\}$ assigning each obligation the maximum depth $t$ can in principle establish on a typical Solidity codebase under documented invocation.
+\end{definition}
+
+\begin{definition}[Joint capability]\label{def:joint}
+For a set of tools $T = \{t_1, \ldots, t_n\}$, the \emph{joint capability} $C_T$ is the pointwise maximum:
+\[
+  C_T(A_i) := \max_{t \in T} c_t(A_i).
+\]
+\end{definition}
+
+The joint capability formalizes the operational claim that a multi-tool composition's coverage is the best-of evidence available for each obligation.
+
+\subsection{Two theorems}
+
+The compositional architecture rests on two algebraic properties of joint capability. Both have simple proofs over the finite depth lattice; we state them precisely and verify them mechanically in our coordinator implementation (\S\ref{sec:coordinator-artifact}).
+
+\begin{theorem}[Compositional Coverage]\label{thm:compositional-coverage}
+Let $T$ be a set of tools with capabilities $c_t$ and let $C_T$ be their joint capability per Definition~\ref{def:joint}. Then for any obligation $A_i$ and any tool $t'$:
+\begin{enumerate}[label=(\roman*)]
+\item $C_T(A_i) \geq c_t(A_i)$ for all $t \in T$ \hfill (monotonicity);
+\item $C_{T \cup \{t'\}}(A_i) \geq C_T(A_i)$ \hfill (refinement under addition);
+\item $C_{T \cup \{t'\}}(A_i) = C_T(A_i)$ if and only if $c_{t'}(A_i) \leq C_T(A_i)$ \hfill (strictness).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+All three claims follow from the definition of $\max$ over a finite multiset.
+(i) For any $t \in T$, $c_t(A_i)$ is a member of the multiset over which $C_T(A_i)$ takes the maximum, hence $C_T(A_i) \geq c_t(A_i)$.
+(ii) The multiset over which $C_{T \cup \{t'\}}(A_i)$ takes the maximum extends the multiset for $C_T(A_i)$ by exactly $c_{t'}(A_i)$; adding an element to a multiset cannot decrease its maximum.
+(iii) The maximum is unchanged by adding $c_{t'}(A_i)$ if and only if $c_{t'}(A_i)$ does not exceed the existing maximum.
+\end{proof}
+
+\begin{theorem}[Certificate Monotonicity]\label{thm:certificate-monotonicity}
+Let $P : (\{A_1, \ldots, A_5\} \to \{0, \ldots, 5\}) \to \{0, 1, 2, 3, 4, 5\}$ be the P-level function defined by
+\[
+  P(C) = \max\{L : C(A_i) \geq R(L) \;\text{for all}\; A_i\}
+\]
+where $R : \{0, \ldots, 5\} \to \{0, \ldots, 5\}$ is the level-to-required-depth table, monotone in $L$. Then for any tool set $T$ and any additional tool $t'$:
+\[
+  P(C_{T \cup \{t'\}}) \geq P(C_T).
+\]
+\end{theorem}
+
+\begin{proof}
+By Theorem~\ref{thm:compositional-coverage}(ii), $C_{T \cup \{t'\}}(A_i) \geq C_T(A_i)$ for every $A_i$. The set $\{L : C(A_i) \geq R(L) \;\text{for all}\; A_i\}$ is a downward-closed subset of $\{0, \ldots, 5\}$ (because $R$ is monotone), and replacing $C$ with a pointwise-greater function can only enlarge this set, never shrink it. The maximum of the enlarged set is therefore at least the maximum of the original set.
+\end{proof}
+
+\noindent The two theorems together yield the operational claim: \emph{adding a verification tool to the stack never lowers the joint coverage or the certifiable compliance level.}
+
+\subsection{The TOOL-MAPPING calibration artifact}
+
+Theorems~\ref{thm:compositional-coverage} and~\ref{thm:certificate-monotonicity} are content-free without empirical values for each $c_t$. We provide these in a separately-citable calibration artifact, \texttt{TOOL-MAPPING v1.0}, which records for each tool $t$ and each obligation $A_i$ the documented capability $c_t(A_i)$, justified by reference to the tool's detector catalogue (Slither), SWC-registry coverage (Mythril), property-language expressiveness (halmos), or obligation-signature library (ObligationSol).
+
+Table~\ref{tab:capability-matrix} reports the calibrated capability matrix for the four-tool stack. Detailed entries (33 per-finding mappings spanning the four tools) appear in the supplementary calibration document.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+Tool & $A_1$ & $A_2$ & $A_3$ & $A_4$ & $A_5$ \\
+\midrule
+Slither (v0.10.x)    & 2 & 2 & 0 & 2 & 0 \\
+Mythril (v0.24.x)    & 3 & 3 & 2 & 3 & 0 \\
+halmos (v0.2.x, with property)   & 4 & 4 & 4 & 4 & 4 \\
+ObligationSol (PARALLAX-5 v6)         & 2 & 2 & 0 & 2 & 2 \\
+\midrule
+\textbf{Joint} $C_{\{S, M, h, A\}}$ & 4 & 4 & 4 & 4 & 4 \\
+\bottomrule
+\end{tabular}
+\caption{Calibrated capability matrix for the four-tool stack. Entries are evidence depths per Definition~\ref{def:depth}. The joint row is the pointwise maximum per Definition~\ref{def:joint}; under Theorem~\ref{thm:certificate-monotonicity} the corresponding P-level is $P_4$, provided halmos is invoked with property specifications for each obligation. The bare four-tool stack \emph{without halmos properties} yields joint coverage $(3, 3, 2, 3, 2)$ and $P_2$.}\label{tab:capability-matrix}
+\end{table}
+
+\subsection{Two observations from the matrix}
+
+The matrix establishes two empirical claims worth surfacing explicitly.
+
+\paragraph{$A_5$ is uniquely served by ObligationSol within the static / symbolic stack.} Slither has no oracle detectors; Mythril has no oracle reasoning. Without ObligationSol, the joint capability on $A_5$ collapses to 0 unless halmos is invoked with an oracle-staleness property. ObligationSol is therefore \emph{necessary} (not merely useful) for any static-depth $A_5$ coverage. We refer to this as the \emph{Mango Markets case} (\S\ref{sec:case-mango}) after the 2022 incident that exploited precisely this gap.
+
+\paragraph{halmos is conditionally universal.} halmos can in principle achieve depth 4 on any obligation, but only if the analyst supplies a property function asserting the invariant. Without property files, halmos's contribution is depth 0. This asymmetry is operationally significant: the marginal cost of using halmos depends on specification effort, whereas the other tools run on raw source. The capability matrix above records halmos's intrinsic ceiling; the coordinator records halmos's actual contribution per analysis run.
+
+\subsection{Empirical study: the discovery and held-out corpora}\label{sec:empirical-corpus}
+
+We applied the coordinator to a curated 15-incident corpus drawn from the 53-incident PARALLAX-5 catalog. The corpus is split: 10 incidents for capability calibration (\emph{discovery set}), 5 incidents held out under pre-registration (\emph{validation set}). The discovery set spans all five obligations and the basis-observability axis (\S\ref{sec:obs-sets}). The validation set's predictions are sealed against the calibrated capability matrix and TOOL-MAPPING v1.0 before tool execution.
+
+For each incident we (i) retrieve the pre-exploit contract source from Etherscan at the documented vulnerable commit; (ii) run each tool through the coordinator's standardized runner; (iii) map findings through TOOL-MAPPING v1.0; (iv) compute the certificate with audit trail. The coordinator and runner artifact are open-source~\cite{parallax5coordinator}; tool versions are pinned in the deposited Docker compose file.
+
+\subsection{Case study: the Mango Markets compositional case}\label{sec:case-mango}
+
+The October 2022 Mango Markets exploit ($\$115$M loss) manipulated a single-source spot-price oracle to inflate collateral valuation. Per the corpus entry (\texttt{incident-009}):
+
+\begin{itemize}
+\item Slither reports zero findings on oracle-related code: it has no oracle detector.
+\item Mythril reports zero findings on oracle staleness: it has no oracle reasoning.
+\item halmos with no property file reports nothing.
+\item ObligationSol reports two findings: \texttt{A5\_oracle\_stale\_window} (no freshness check) and \texttt{A5\_oracle\_\allowbreak quorum\_insufficient} (single-source price feed).
+\end{itemize}
+
+The joint capability on $A_5$ for the stack $\{\texttt{Slither}, \texttt{Mythril}, \texttt{halmos}_\text{cold}\}$ is $0$; the joint capability for the stack $\{\texttt{Slither}, \texttt{Mythril}, \texttt{halmos}_\text{cold}, \texttt{ObligationSol}\}$ is $2$. By Theorem~\ref{thm:certificate-monotonicity}, adding ObligationSol cannot lower the P-level, and in this case strictly raises the per-obligation coverage on $A_5$ from depth 0 to depth 2 — the difference between an undefendable certificate ($P_0$ from missing $A_5$ coverage) and a defendable $P_2$ for any contract that does not also leave $A_3$ uncovered. This is what we call \emph{compositional necessity}: a tool whose contribution is not merely additive but is the unique source of coverage on at least one obligation.
+
+\subsection{The coordinator artifact}\label{sec:coordinator-artifact}
+
+The compositional architecture is implemented in an open-source Python package (\texttt{parallax5\_coordinator}) shipped alongside this paper. The package provides:
+\begin{itemize}
+\item A capability model (\texttt{capability.py}) implementing Definitions~\ref{def:depth}--\ref{def:joint}.
+\item Mechanical verification of Theorems~\ref{thm:compositional-coverage}--\ref{thm:certificate-monotonicity} by exhaustive check (2{,}152 algebraic checks, all passing) over the known-tools set and a synthetic lattice extension.
+\item A runner module that executes Slither, Mythril, halmos, and ObligationSol against a Solidity contract, parses output, and normalizes into the \texttt{Finding} schema.
+\item A certifier (\texttt{certifier.py}) that produces a versioned P-level certificate with an audit trail recording exactly which findings from which tools contribute to which obligation's coverage at which depth.
+\item A command-line interface (\texttt{parallax5-coordinator}) with subcommands \texttt{analyze}, \texttt{capability}, and \texttt{mapping}.
+\end{itemize}
+
+The package is released under Apache-2.0 alongside TOOL-MAPPING v1.0; community contribution of new entries (additional Slither detectors, new tools, refined justifications) follows the standard pull-request flow. We intend the mapping table to be a living artifact updated as tool capabilities evolve.
+
+\subsection{Threats to validity}
+
+The capability matrix entries are calibrated against documented tool capabilities. Tool behaviour in production may diverge from documentation when contracts trigger detector edge cases or exhaust symbolic-execution budgets. We mitigate this by (i) pinning tool versions in the runner's Docker image; (ii) recording per-finding mapping justifications in TOOL-MAPPING v1.0 such that recalibration is auditable; (iii) reporting both cold-run and with-property capabilities for halmos.
+
+The held-out corpus is small ($n = 5$); larger validation is documented as a follow-on study extending to the full 53-incident catalog. We pre-register predictions to avoid hindsight calibration.
+
+The mapping itself is a research artifact subject to community review. We invite tool vendors and adjacent researchers to challenge specific entries: a justified counterclaim refines the calibration and strengthens the joint claim.
+
+\subsection{Implication for the PARALLAX-5 standard}
+
+The compositional architecture realizes the standard's intent (\S\ref{sec:standards}): PARALLAX-5 does not displace existing analyzers; it provides the obligation taxonomy under which their heterogeneous outputs compose into a single defensible compliance claim. A P-level is a function of the joint coverage; the joint coverage is a function of the tools applied; the tools are interchangeable and additive. This is the inversion that turns a fragmented tool ecosystem into a coordinated certification surface.
+
+
+\section{Adoption Pathways}\label{sec:adoption}
+
+The artifact's commercial path is concrete, not aspirational. Five distinct constituencies have clear incentives to adopt:
+
+\begin{description}
+  \item[Audit firms.] Adopt PARALLAX-5 obligation tags ($A_1$\ldots$A_5$) as report headings, emit P2 or P3 certificates as audit deliverables. Differentiation: ``every finding labeled by obligation; every fix verified to the labeled level.'' Marginal cost: minimal (re-organizing existing reports).
+  \item[Protocol teams.] Publish P3+ certificates alongside audit reports. Differentiation: a single machine-readable artifact replacing dozens of PDFs. Insurer-ready. Marginal cost: $\sim 1$ engineer-week for typical vault per certificate; revalidation triggers reduce per-upgrade cost.
+  \item[DeFi insurance underwriters.] Use compliance level as a tier input. Differentiation: comparable, machine-readable risk inputs across protocols. Marginal cost: certificate-parser integration (1 engineer-week).
+  \item[AI-agent platforms.] Deploy the step-secure gate in front of every state-mutating action proposed by an agent. Differentiation: provable execution-time containment. Marginal cost: one wrapped contract call per agent action.
+  \item[Chains and L2s.] Maintain a public registry of P-level certificates per deployed contract. Differentiation: comparability for users. Marginal cost: registry contract + UI.
+\end{description}
+
+The framework does not displace existing tools, auditors, or workflows; it organizes their outputs into a single artifact that can be machine-checked, signed, and revoked.
+
+PARALLAX-5 defines five progressive compliance levels:
+\begin{itemize}
+  \item \textbf{P0 Unclassified.} No basis mapping.
+  \item \textbf{P1 Annotated.} Each value-affecting transition mapped to $A_1$\ldots$A_5$ via \verb|@axioms| declarations.
+  \item \textbf{P2 Statically Screened.} A static analyzer produces an obligation report.
+  \item \textbf{P3 Symbolically Checked.} Bounded counter-example search over value-affecting paths (e.g., halmos).
+  \item \textbf{P4 Formally Proved.} SMT/Lean/Certora-style proof of every declared obligation.
+  \item \textbf{P5 Runtime Enforced.} A step-secure gate rejects unsafe transitions and emits cryptographic certificates.
+\end{itemize}
+The complete schema and example certificate are in the companion document \texttt{PARALLAX-5-Standard.md}.
+
+\section{Tooling and Artifact}\label{sec:stack}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{rlll}
+\toprule
+\# & Layer & Tool & Strength \\
+\midrule
+1 & Bounded model checking & Z3 SMT & Witnesses + finite-depth UNSAT \\
+2 & Inductive invariants & Z3 (quantified) & Unbounded preservation \\
+3 & Basis minimality & Z3 (witnesses) & Independence of each $A_i$ \\
+4 & Closure inhabitation & Z3 ($\times 31$) & All 31 classes realized \\
+5 & ObligationSol fixture agreement & Z3 vs regex & 6/6 agreement on fixtures \\
+6 & Bytecode-level proofs & halmos & EVM symbolic execution \\
+7 & Lean 4 theorems & Lean & 95 theorems, 0 \texttt{sorry} \\
++ & BitVec(256) extension & Z3 BV mode & uint256 overflow class \\
++ & SMT-LIB export & Z3 + standard & Solver-portable proofs \\
+\bottomrule
+\end{tabular}
+\caption{Verification stack.}\label{tab:stack}
+\end{table}
+
+\subsection{Theorem Inventory with Lean Names}
+
+Table~\ref{tab:thm-inventory} below maps each substantive result in this paper to its Lean~4 identifier in \texttt{Parallax5.lean}, enabling a reviewer who has the source to navigate directly to the relevant proof. The names follow a uniform convention: \texttt{snake\_case} identifiers with the result's role as the suffix (e.g., \texttt{\_safe}, \texttt{\_preserved}, \texttt{\_sound}, \texttt{\_max}). Each entry compiles in the deposited kernel run with zero \texttt{sorry}; the verification script reports the count.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+Result & Lean name & Type \\
+\midrule
+Conditional completeness & \texttt{conditional\_completeness} & theorem (cond) \\
+Conditional safety (contrap.) & \texttt{conditional\_safety} & theorem (cond) \\
+Falsification criterion & \texttt{completeness\_iff\_no\_counterexample} & theorem \\
+Transition-level minimality & \texttt{basis\_minimal} & theorem + witnesses \\
+$\sigma$ empty iff $B$ & \texttt{sigma\_empty\_implies\_B}, \texttt{B\_implies\_sigma\_empty} & theorem \\
+Constructive closure inhabitation & \texttt{constructive\_closure\_inhabitation} & theorem \\
+Toy-machine inhabitation & \texttt{toy\_machine\_inhabits\_subset} & theorem \\
+Hardened-deposit $A_1$ preservation & \texttt{a1\_preserved\_by\_deposit\_hardened} & theorem \\
+Hardened admin-op $A_2$ preservation & \texttt{a2\_preserved\_by\_admin\_guarded} & theorem \\
+Hardened oracle-read $A_5$ preservation & \texttt{a5\_preserved\_by\_oracle\_read\_guarded} & theorem \\
+$A_2$-completeness for unauthorized mut. & \texttt{a2\_complete\_for\_unauthorized\_mutations} & theorem \\
+$A_5$-completeness for stale oracle & \texttt{a5\_complete\_for\_stale\_oracle} & theorem \\
+$A_4$-completeness for reentrancy & \texttt{a4\_complete\_for\_reentrant\_mutation} & theorem \\
+Compositional preservation (4 obligations) & \texttt{a1\_compositional}, \ldots & theorems \\
+Gate state safety & \texttt{basis\_gate\_state\_safety} & theorem (new) \\
+Gate transition safety & \texttt{basis\_gate\_transition\_safety} & theorem (new) \\
+Maximal permissive safety & \texttt{basis\_gate\_is\_maximal\_permissive} & theorem (new) \\
+No basis-violating exploit & \texttt{no\_basis\_violating\_exploit\_under\_sound\_gate} & theorem (new) \\
+Monitor soundness suffices & \texttt{monitor\_soundness\_suffices} & theorem \\
+Adaptive iteration safety & \texttt{adaptive\_iteration\_preserves\_security} & theorem \\
+Step-secure refinement transfer & \texttt{step\_refinement\_transfer} & theorem (new) \\
+On-chain indistinguishability & \texttt{onchain\_indistinguishability\_of\_key\_compromise} & theorem \\
+Conservation wrapper preserves $A_1$ & \texttt{conservation\_wrapper\_preserves\_A1} & theorem \\
+Sibling reentrancy guard preserves $A_4$ & \texttt{sibling\_reentrancy\_guard\_preserves\_A4} & theorem \\
+ValueBearingMachine generalization & \texttt{generic\_agent\_gate\_preserves\_security} & theorem \\
+Cross-VM agent safety (Solana/Move/Bank) & \texttt{solana\_agent\_safe}, etc. & theorems \\
+\bottomrule
+\end{tabular}
+\caption{Theorem inventory with exact Lean names. All compile without \texttt{sorry} in the Lean 4 module at \texttt{parallax/formal/lean/Parallax5.lean}.}\label{tab:thm-inventory}
+\end{table}
+
+\subsection{Conditional ObligationSol Soundness}
+
+We make ObligationSol's soundness conditional on parser/extractor assumptions:
+
+\begin{proposition}[Fixture agreement]
+On the finite fixture corpus, ObligationSol's verdict agrees with the SMT reference model on 6/6 cases.
+\end{proposition}
+
+\begin{theorem}[Conditional ObligationSol soundness over annotated fragment]
+Assume:
+\begin{enumerate}
+  \item \textbf{Extractor completeness over $\mathcal{L}_{\mathrm{ann}}$}: every value-affecting transition in the fragment is emitted as an obligation.
+  \item \textbf{Parser soundness}: every emitted obligation corresponds to the intended source-level transition.
+  \item \textbf{Fragment restriction $\mathcal{L}_{\mathrm{ann}}$}: no delegatecall, no inline assembly, no dynamic dispatch through unknown externals, no upgradeable storage collision, no hidden callbacks, all value-affecting entrypoints visible, all external data reads annotated.
+\end{enumerate}
+Then if ObligationSol accepts the contract, the generated obligation set implies $A_1, \ldots, A_5$ for all analyzed transitions.
+\end{theorem}
+
+\begin{proposition}[ObligationSol incompleteness]
+There exists a contract outside $\mathcal{L}_{\mathrm{ann}}$ that violates $A_4$ but is accepted by ObligationSol. The Solv-clone with sibling-callback cross-function reentrancy is the canonical witness.
+\end{proposition}
+
+\section{The Certificate Schema}\label{sec:cert-schema}
+
+The coordinator's output, referenced throughout this paper as ``the certificate,'' is specified by a machine-readable schema released as RFC v1.0 (deposit \texttt{docs/CERTIFICATE\_SCHEMA.md}, with JSON Schema realization at \texttt{schemas/certificate\_v1.json} validated as Draft 2020-12). This section gives the schema's formal content: its field-level specification, its lifecycle state machine, its canonical serialization for deterministic fingerprinting, and the conformance requirements it imposes on issuers, validators, and consumers.
+
+\subsection{Top-level fields}
+
+A v1.0 certificate is a JSON object containing exactly the following 19 top-level fields:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Field} & \textbf{Type} & \textbf{Purpose} \\
+\midrule
+\texttt{schema\_version}      & string (semver)   & Schema version tag (currently \texttt{"1.0.0"}) \\
+\texttt{certificate\_id}      & uuid v4           & Globally unique identifier \\
+\texttt{issued\_at}           & ISO 8601          & Issuance timestamp \\
+\texttt{validity}             & object            & \texttt{not\_before}, \texttt{not\_after}, \texttt{lifecycle\_state} \\
+\texttt{issuer}               & object            & Issuer name and public key \\
+\texttt{protocol}             & object            & Name, version, identifier, category \\
+\texttt{contract}             & object            & Source hash, address, chain id \\
+\texttt{trust\_base}          & object            & Cryptographic and refinement assumptions \\
+\texttt{obligation\_coverage} & object            & Depth assignment for each of A1--A5 \\
+\texttt{evidence}             & array             & List of evidence entries (tool findings, theorems) \\
+\texttt{crops\_vector}        & object            & Computed CROPS rating (C, R, O, P, S) \\
+\texttt{walkaway}             & object            & Classification, proof reference, dependencies \\
+\texttt{mapping}              & object            & Tool-mapping reference (namespace, version, DOI) \\
+\texttt{fingerprint}          & sha-256 hex       & Canonical-serialization hash \\
+\texttt{signature}            & object            & Ed25519 signature over fingerprint \\
+\texttt{supersedes}           & uuid (optional)   & Prior certificate this revision replaces \\
+\texttt{revocation\_reason}   & string (optional) & Populated when lifecycle state is revoked \\
+\texttt{registry\_anchor}     & object (optional) & On-chain anchor (tx hash, block) once registered \\
+\texttt{forks}                & array (optional)  & References to derivative forks \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Worked-example excerpt.} A concrete certificate (for the patched ERC-4626 vault of \S\ref{ssec:demo-vault}) renders as:
+
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize,frame=single,backgroundcolor=\color{leangray},breaklines=true]
+{
+  "schema_version": "1.0.0",
+  "certificate_id": "fa52e2f3-9d4e-4dad-b5f5-ac78dc170c31",
+  "issued_at": "2026-05-26T11:43:00Z",
+  "validity": { "not_before": "2026-05-26", "lifecycle_state": "issued" },
+  "issuer": { "name": "AquaUrsa Research", "public_key": "ed25519:6698bfea..." },
+  "protocol": { "name": "PARALLAX-5 Demo 1 - PatchedVault",
+                "category": "vault",  "identifier": "demos/vault" },
+  "contract": { "source_hash": "sha256:7a304cbe...", "chain_id": null },
+  "obligation_coverage": {
+    "A1": { "depth": 4, "evidence_refs": ["ev-lean-001"] },
+    "A2": { "depth": 4, "evidence_refs": ["ev-lean-002"] },
+    "A3": { "depth": 0, "evidence_refs": [] },
+    "A4": { "depth": 2, "evidence_refs": ["ev-slither-001"] },
+    "A5": { "depth": 0, "evidence_refs": [] }
+  },
+  "evidence": [
+    { "evidence_id": "ev-lean-001", "tool": "lean4_kernel",
+      "obligation_mapped_to": "A1", "depth_contribution": 4,
+      "justification": "Conservation.lean: deposit_preserves_conservation, ..." },
+    { "evidence_id": "ev-slither-001", "tool": "slither",
+      "obligation_mapped_to": "A4", "depth_contribution": 2,
+      "justification": "reentrancy-no-eth (Medium)" }
+  ],
+  "crops_vector": { "C": 4, "R": 5, "O": 5, "P": 0, "S": 4,
+                    "computation_method": "max_within_dimension" },
+  "walkaway": { "classification": "full",
+                "proof_ref": "demos/vault/proof/Conservation.lean",
+                "dependencies_disclosed": [] },
+  "mapping": { "namespace": "tool-mapping/aquaursa-v1",
+               "version": "1.0.0", "doi": "10.5281/zenodo.20386868" },
+  "fingerprint": "a880650b924463c61c78c014f4966e554fa59913941e872e036255259a8da86d",
+  "signature": { "algorithm": "ed25519", "message": "<fingerprint>",
+                 "signature": "<64 bytes hex>" }
+}
+\end{lstlisting}
+
+\noindent The excerpt elides the registry-anchor, supersedes, and fork-reference fields (all optional). The full schema is in \texttt{schemas/certificate\_v1.json}; the worked example is in \texttt{examples/certificate\_uniswap\_v3\_core.json} (a different protocol, but the structure is identical).
+
+\subsection{Lifecycle state machine}
+
+A certificate occupies exactly one of seven lifecycle states at any time. Transitions between states are restricted as follows:
+
+\begin{definition}[Certificate lifecycle]\label{def:cert-lifecycle}
+The state space is
+\[
+\{\mathit{draft}, \mathit{issued}, \mathit{published}, \mathit{superseded}, \mathit{revoked}, \mathit{expired}, \mathit{withdrawn}\}
+\]
+with admissible transitions:
+\[
+\mathit{draft} \to \mathit{issued} \to \mathit{published} \to \{\mathit{superseded}, \mathit{revoked}, \mathit{expired}, \mathit{withdrawn}\}.
+\]
+The terminal states are absorbing. The transition from $\mathit{issued}$ to $\mathit{published}$ is the registry-anchor commit; the transition to $\mathit{superseded}$ requires a successor certificate naming the predecessor via \texttt{supersedes}.
+\end{definition}
+
+\subsection{Canonical serialization and fingerprint}
+
+\begin{definition}[Canonical serialization]\label{def:canon-ser}
+Let $J$ be a certificate object with the \texttt{fingerprint} and \texttt{signature} fields removed. The canonical serialization $\mathrm{Canon}(J)$ is the lexicographically-key-sorted JSON encoding of $J$, with no whitespace except after \texttt{":"} and \texttt{","} (one space each), with UTF-8 encoding, with all string literals normalized to NFC, and with no trailing newline.
+\end{definition}
+
+\begin{definition}[Fingerprint]\label{def:fingerprint}
+The fingerprint of a certificate is $\mathrm{SHA{-}256}(\mathrm{Canon}(J))$, where $J$ is the certificate object with the fingerprint and signature fields removed.
+\end{definition}
+
+The fingerprint is the input to the Ed25519 signature, and the signature's \texttt{message} field is exactly the fingerprint byte string. This construction has the property that any modification to any other field changes the fingerprint, which is the substrate's tamper-detection primitive. The validator command \texttt{parallax5 validate} recomputes the fingerprint from the post-removal canonical serialization and compares it to the stored fingerprint; mismatch indicates tampering.
+
+\subsection{Evidence resolution}
+
+\begin{definition}[Evidence resolution validity]\label{def:evidence-resolution}
+A certificate $C$ has \emph{valid evidence resolution} iff for each obligation $A_i$ in \texttt{obligation\_coverage}, its depth $d_i$ satisfies $d_i = \max_{e \in C.\mathit{evidence} : e.\mathit{obligation} = A_i} e.\mathit{depth\_contribution}$.
+\end{definition}
+
+This is the operational form of compositional coverage (Theorem~\ref{thm:compositional-coverage}): the certificate's per-obligation depth is determined by the strongest piece of evidence in its catalog. The validator enforces this constraint and rejects certificates whose claimed depth exceeds what its evidence supports.
+
+\subsection{Registry events}\label{sec:registry}
+
+The certificate's lifecycle is anchored on chain via the \texttt{ParallaxRegistry} contract at \texttt{registry/src/ParallaxRegistry.sol} (Apache-2.0, Solidity 0.8.24, deployable to any EVM chain). A reference deployment is live on Sepolia at \texttt{0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b} (source verified on Etherscan), with the first certificate already anchored under the canonical vault-demo fingerprint. The contract is permissionless: any party may call \texttt{issue(bytes32 fingerprint)} to register a new certificate; only the original registrant may transition that record through the schema's lifecycle states. Six event kinds are emitted---\texttt{Issued}, \texttt{Published}, \texttt{Superseded}, \texttt{Revoked}, \texttt{Expired}, \texttt{Withdrawn}---each carrying the certificate's fingerprint and the relevant transition metadata, with the fingerprint and issuer indexed for efficient query. Consumers index the registry by fingerprint to retrieve the currently-effective certificate, or by issuer address to enumerate an issuer's complete certification history.
+
+The contract's gas profile (verified against \texttt{anvil}) is: \texttt{issue()} 115k, \texttt{publish()} 32k, \texttt{supersede()} 38k, \texttt{revoke()} 38k, \texttt{expire()} 32k, \texttt{withdraw()} 32k. At mainnet pricing of 30~gwei and \$2{,}500/ETH, an \texttt{issue()} call costs approximately \$8.60; subsequent state transitions cost approximately \$2.40 each.
+
+\paragraph{State-machine soundness.} The contract's lifecycle state machine is formally verified in \texttt{lean/Parallax5/Registry.lean} (6 theorems, 0 \texttt{sorry}). The proved properties are: (i)~terminal states absorb (no transition originates from \texttt{Superseded}, \texttt{Revoked}, \texttt{Expired}, or \texttt{Withdrawn}); (ii)~the view function \texttt{isEffective()} returns true exactly for the operational states $\{\texttt{Issued}, \texttt{Published}\}$; (iii)~every transition into a terminal state originates from \texttt{Published}; (iv)~the four targets reachable from \texttt{Published} are exactly the four terminal states; (v)~the contract's \texttt{SelfSupersession} revert proves a record cannot supersede itself (the supersession edge forms a strict partial order); (vi)~all six transitions preserve the \texttt{ValidState} invariant. These theorems together establish that the on-chain state machine implements the schema RFC v1.0 \S3 specification.
+
+\paragraph{Self-application.} The registry contract is itself a value-bearing on-chain artifact and can therefore carry its own PARALLAX-5 certificate. A canonical self-certificate records: obligation coverage at $D_4$ for $A_1$ (state integrity, proved by \texttt{Registry.lean}) and $A_2$ (authorization closure, proved by the same module); walkaway class \emph{full} (no admin role, no pausing mechanism, no upgrade path); CROPS vector $(4, 5, 5, 0, 4)$. This self-application demonstrates substrate maturity: the infrastructure that records certificates carries a certificate that satisfies the same obligations it records.
+
+\paragraph{Test coverage.} The contract is covered by 24 Foundry tests at \texttt{registry/test/ParallaxRegistry.t.sol}, including 2 fuzz tests at 256 runs each, exercising every state transition, every revert path, and the absorption invariance of all four terminal states. All 24 pass.
+
+\subsection{Conformance requirements}
+
+\begin{itemize}
+  \item \textbf{Issuers} MUST produce certificates that validate against \texttt{schemas/certificate\_v1.json} as Draft 2020-12; MUST sign the fingerprint with a public key declared in the \texttt{issuer} object; MUST publish the public key out of band (e.g., DOI, well-known URL).
+  \item \textbf{Validators} MUST reject any certificate whose computed fingerprint does not match its stored fingerprint; MUST reject any certificate whose evidence resolution is invalid; MUST reject any certificate signed with a key not associated with the named issuer.
+  \item \textbf{Consumers} SHOULD evaluate the certificate's CROPS vector against an explicit policy, and SHOULD NOT rely on the certificate as a substitute for the policy.
+\end{itemize}
+
+A worked example (\texttt{examples/certificate\_uniswap\_v3\_core.json}) validates cleanly under \texttt{parallax5 validate} and produces the CROPS vector reproduced in Section~\ref{sec:crops}.
+
+\section{Substrate Governance}\label{sec:governance}
+
+A coordination layer's value depends on its credibility as a coordination layer. A coordination layer captured by a single party --- whether commercial or state --- ceases to coordinate the field. PARALLAX-5 addresses this risk structurally: by placing the standard text under a license whose effects cannot be revoked, by foregoing trademark and patent claims, and by specifying the fork procedure under which derivative standards can co-exist without fragmentation.
+
+\subsection{The Non-Capturability Charter}
+
+The Charter (deposit \texttt{NON\_CAPTURABILITY\_CHARTER.md}) is an eleven-article governance commitment under CC0 (Creative Commons Zero). The articles state the substrate's commitments structurally rather than aspirationally:
+
+\begin{itemize}
+  \item Article 1 declares the substrate's standard text under CC0; no commitment to keep the text under CC0 is needed because the license is irrevocable by construction.
+  \item Article 2 declares structural irrevocability: AquaUrsa Research makes no patent claims over techniques disclosed in the substrate and does not intend to seek such protection; this is a statement about AquaUrsa's own conduct, not a warranty regarding third-party patent rights. No trademark is asserted on the name PARALLAX-5; no token is issued; no governance body is established; no treasury is established.
+  \item Article 3 declares walkaway commitment for the substrate itself: there is no role within the substrate whose disappearance would impede the substrate's continued use by anyone.
+  \item Article 4 prohibits any party (including the original author) from establishing exclusive control over substrate-derivative products. Commercial layers built on top of the substrate are permitted; capture of the substrate itself is foreclosed.
+  \item Articles 5--10 specify the corresponding details for credentialing, certification, the registry, the tool mapping, and the certificate schema.
+  \item Article 11 specifies that the Charter's amendment protocol is a fixed point under itself: any amendment that would weaken Articles 1--10 is automatically void.
+\end{itemize}
+
+The Charter is structurally enforceable rather than reputationally enforceable. CC0 cannot be revoked. A patent that was not filed cannot retroactively encumber the technique. A trademark that was never asserted cannot be enforced. A governance body that was never established cannot vote. This is the substance of ``structural irrevocability.''
+
+\subsection{License Layering}\label{sec:license-layering}
+
+The substrate distinguishes the public coordination layer from implementation and service layers. The PARALLAX-5 standard text --- including the obligation vocabulary ($A_1$--$A_5$), the depth scale ($D_0$--$D_5$), the PARALLAX-CROPS dimensions, the walkaway taxonomy, the certificate field semantics, and this paper's specification content --- is dedicated under CC0 1.0 Universal. Reference software implementations, including the coordinator (\texttt{parallax5\_coordinator}), the validator, the certificate registry contract (\texttt{ParallaxRegistry.sol}), the CLI, and the Lean and SDK artifacts, are released under Apache-2.0 unless an individual file declares otherwise. The paper itself is licensed under CC-BY 4.0 to preserve academic attribution norms. AquaUrsa Research retains control over its own issuer keys, hosted services, support offerings, signed certificate attestations, and commercial validation processes; this control does not extend to the public standard vocabulary.
+
+The structural consequence: a third party may freely adopt PARALLAX-5 terminology, issue PARALLAX-5 certificates, deploy the registry contract, operate a registry instance, and build commercial services on the substrate without permission from AquaUrsa Research. A protocol team relying on a specific issuer's attestation distinguishes between the public substrate and the issuer's signed identity at the certificate level: each certificate carries an issuer public key, a fingerprint, and a registry anchor, and the substrate's verification logic treats these as the basis of attestation trust. The substrate's reputation depends on the cryptographic integrity of these mechanisms, not on trademark enforcement.
+
+\subsection{The Fork Protocol}
+
+The Fork Protocol (deposit \texttt{FORK\_PROTOCOL.md}) addresses the practical question of standard evolution: how can a derivative version of PARALLAX-5 co-exist with the canonical version without fragmenting the field's vocabulary?
+
+\begin{definition}[Fork classification]\label{def:fork-types}
+A derivative standard is classified into exactly one of four \emph{fork types}:
+\begin{itemize}
+  \item \textbf{Calibration fork} --- adjusts the depth assignments in the tool-mapping without changing the substrate's vocabulary; co-exists with the canonical via parameter overrides.
+  \item \textbf{Extension fork} --- adds new obligation classes or new evidence-source kinds; specifies a default null contribution to existing dimensions.
+  \item \textbf{Refinement fork} --- replaces some obligation definitions with stricter variants; provides a forward map from canonical evidence to refined evidence.
+  \item \textbf{Independent reformulation} --- the derivative replaces substantial portions of the substrate and is not jointly composable with the canonical; classified to make this clear to consumers.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Compatibility levels]\label{def:compat-levels}
+A fork is further classified by its compatibility relation to the canonical: \emph{strict} (certificates from one validate under the other), \emph{additive} (canonical certificates lift to fork without modification, but not the reverse), \emph{semantic-divergence} (certificates do not interchange but the field vocabulary is mutually recognizable), or \emph{independent} (separate vocabularies).
+\end{definition}
+
+A pull-back procedure specifies how a fork's improvements can be merged into the canonical via standard governance (no governance body required; the merge is procedural and effected by the original author or any successor maintainer publishing the merged version). The Fork Protocol's existence is itself an anti-capture mechanism: if the canonical's stewardship becomes contentious, an independent fork can succeed without the field's vocabulary fragmenting.
+
+\subsection{Why CC0 is structurally necessary}
+
+A commercial substrate would fail at coordination because adoption would mean accepting a licensing cost that grows with the substrate's success. The substrate's value derives from being a shared vocabulary across protocols; a shared vocabulary cannot be priced because pricing impedes sharing. CC0 is the only license that admits both unlimited commercial use \emph{and} unlimited modification with no attribution requirement. The choice is not values-driven but mechanism-driven: CC0 is the license that makes the substrate work.
+
+This is more than a slogan. Consider the failure modes the choice forecloses. A copyleft license (GPL family) would require derivative works to be similarly licensed, which would interfere with proprietary commercial layers built on top of the substrate. A permissive-with-attribution license (MIT, BSD, Apache-2.0) would require every certificate, every audit report, every wallet UI that displays a CROPS vector to include attribution, which would either be ignored (defeating the license) or comply (creating friction). A no-derivatives clause would freeze the substrate at its initial state. A non-commercial clause would block the very commercial layers that drive adoption. CC0 is the unique license whose semantics match the coordination function the substrate is designed to provide.
+
+The substrate enables commercial products built on top of it (see \S\ref{sec:adoption}: the registry, AI-FV co-pilot, agent runtime gate deployment as a service), but the substrate itself is non-commercial by construction. The Charter's Article 4 prohibits any party --- including the original author --- from establishing exclusive control over substrate-derivative products. Commercial layers compete on execution quality; the substrate underlying them remains common.
+
+\section{Claims Table}\label{sec:claims}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{6.5cm}p{3.5cm}p{4.5cm}}
+\toprule
+Claim & Type & Evidence \\
+\midrule
+Conditional completeness (assuming adequacy) & theorem & Lean \\
+Adequacy of basis for on-chain code bugs & assumption + empirical & catalog + halmos \\
+Adequacy for off-chain-rooted basis-observable consequences & assumption + empirical & Resolv / Drift / Kelp \\
+Step-secure gate is maximally permissive & theorem & Lean \\
+Monitor soundness suffices for safety & theorem & Lean \\
+Adaptive policies cannot escape envelope & theorem & Lean \\
+Cross-VM transfer (Solana / Move / banking) & theorem (under step refinement) & Lean \\
+EVMYulLean refinement (composed instance verified) & theorem (instance-witnessed) & Zenodo deposit \\
+Compositional coverage \& monotonicity & theorem (lattice-exhaustive) & coordinator + TOOL-MAPPING v1.0 \\
+TOOL-MAPPING v1.0 calibration & calibration artifact + justifications & \texttt{schemas/tool\_mapping\_v1.json} \\
+On-chain indistinguishability & theorem & Lean \\
+$p^* = (1-c/v)/(1-\epsilon)$ & proposition (game theory) & math + Z3 \\
+$L_{\mathrm{basis-observable}} = \$4.01\text{B}$ & empirical & \texttt{catalog.csv} \\
+$L_{\mathrm{basis-unobservable}} = \$1.62\text{B}$ & empirical & \texttt{catalog.csv} \\
+95 Lean theorems, 0 \texttt{sorry} & artifact & \texttt{Parallax5.lean} \\
+129 Python fire tests (9 suites) & artifact & \texttt{fire\_tests.py} \\
+\bottomrule
+\end{tabular}
+\caption{Claims table separating theorems, assumptions, empirical evidence, and artifact claims.}\label{tab:claims}
+\end{table}
+
+\section{Related Work}\label{sec:related}
+
+\paragraph{Smart-contract static analysis.} Slither~\cite{slither} pioneered syntactic pattern matching; its detector library overlaps with our obligation patterns but is presented as a checklist. Mythril~\cite{mythril} and halmos~\cite{halmos} provide symbolic execution. None of these tools claim or prove a basis-completeness property.
+
+\paragraph{Formal verification.} Certora~\cite{certora} verifies user-supplied rules via SMT; KEVM~\cite{kevm} provides full EVM semantics in K. Our work is complementary: we identify a small fixed obligation set covering the empirically observed vulnerability space, verifiable by any of the above tools.
+
+\paragraph{Capability-based and noninterference security.} The general approach of conservation-law-like invariants has antecedents in noninterference~\cite{noninterference}. Our novelty: the specific basis, the conditional-completeness formulation, the two-axis empirical classification, and the cross-domain generalization.
+
+\paragraph{AI agent safety.} Constitutional AI~\cite{ca} addresses agent behavior at training time. Our framework addresses execution time via a step-secure gate. The two are complementary.
+
+\section{Limitations}\label{sec:limitations}
+
+The basis is empirically validated for on-chain consequence transitions in our 2016--2026 corpus. We do not prove semantic completeness against the universe of EVM programs. The conditional-completeness theorem is conditional on the adequacy assumption; the empirical corpus and halmos reproductions support adequacy, but adequacy is itself falsifiable.
+
+ObligationSol misses cross-function reentrancy; the substrate composes ObligationSol with halmos to bridge the incompleteness gap.
+
+The Lean module covers $A_1, A_2, A_4, A_5$ with full proofs; $A_3$ is verified at the SMT and bytecode level. The cryptographic assumption (ECDSA EUF-CMA) is external to the Lean formalization.
+
+The basis-observability classification of some incidents is necessarily judgment-dependent. Drift in particular sits on a boundary that depends on monitor design. We mark such cases as \emph{ambiguous} rather than forcing a binary choice.
+
+The framework's central claim is best tested by adversarial review. We invite the community to attempt falsification: find a basis counterexample — a trust-base-respecting loss-inducing transition that satisfies all five obligations.
+
+\section{Conclusion}\label{sec:conclusion}
+
+We have proposed PARALLAX-5: a five-obligation transition interface, a parameterized observability boundary, a step-secure execution-time shield, and a typeclass refinement to a production EVM semantics. Where the basis is adequate and monitors are sound, the substrate gives a conditionally complete execution-time shield for value-bearing transitions. Where loss arises from information absent from the on-chain trace, the indistinguishability theorem identifies the irreducible scope boundary and the need for complementary trust-base controls. Mixed incidents are handled by separating root cause from basis-observable transition consequence.
+
+The ecosystem layer makes four additions to the formal core. The walkaway property (\S\ref{sec:walkaway}) replaces ``decentralization'' --- a slogan --- with a falsifiable predicate over protocol artifacts and a five-level classification verified by inspection of obligation traces under admin quiescence. The PARALLAX-CROPS vector (\S\ref{sec:crops}) extends the single-axis depth scale to a five-dimensional rating that captures dimensions of trust beyond security alone, enabling consumer-side policy filtering without bespoke per-protocol diligence; the v1.0.1 contribution matrix is conservative by design, refusing to inflate privacy ratings from incidental signature-integrity evidence. The three demonstrations (\S\ref{sec:case-studies}) exhibit the substrate working end-to-end across three protocol categories --- vault, bridge, agent runtime --- each composing heterogeneous evidence (static analysis, symbolic execution, Lean proof, runtime enforcement) under a single fingerprinted certificate. The certificate schema (\S\ref{sec:cert-schema}) makes that certificate machine-readable, machine-validatable, and on-chain-anchorable.
+
+The governance commitments (\S\ref{sec:governance}) establish that the substrate is structurally uncapturable: not by promise but by the absence of the levers through which capture would proceed. CC0 cannot be revoked. A patent that was not filed cannot retroactively encumber. A trademark that was never asserted cannot be enforced. A governance body that was never established cannot vote. These commitments are mechanism, not aspiration.
+
+The substrate's natural application extends beyond DeFi to any setting where autonomous agents propose state-mutating actions against value-bearing ledgers. The three demonstrations together cover (i)~protocols where the substrate's value is composing static and formal evidence, (ii)~protocols where the substrate's value is honest reporting of dependencies, and (iii)~protocols where the substrate's value is runtime enforcement itself. We expect the third class to grow most rapidly as autonomous-agent deployment expands; the AI-Agent Containment Theorem (Theorem~\ref{thm:ai-containment}) provides the formal guarantee that makes that growth safe.
+
+The substrate's central claim remains falsifiable: if a reader can produce a trust-base-respecting, loss-inducing transition that satisfies all five obligations, the claim is refuted, and the substrate's vocabulary requires extension or repair. The catalog reports zero such refutations over 53 historical incidents and 13 forward-tested 2026 incidents. That is the substantive guarantee. The remainder of the substrate --- the schema, the lifecycle, the CROPS vector, the registry, the agent gate --- is infrastructure that becomes meaningful in proportion to the strength of that guarantee.
+
+\clearpage
+
+\begin{thebibliography}{99}
+
+\bibitem{duncan2026parallax5verification}
+B.~P.\ Duncan,
+\emph{PARALLAX-5 / EVMYulLean Integration Verification: Machine-Checked Composition of an Abstract Refinement Substrate with a Production EVM Semantics in Lean~4}, Version 1.0.0.
+Zenodo, May 2026.
+\href{https://doi.org/10.5281/zenodo.20386868}{doi:10.5281/zenodo.20386868}.
+Verification identifier \texttt{pax5-evmyul-2026-05-25-9b7bb24d91c5}; receipt SHA-256 \texttt{9b7bb24d91c58e98\ldots}; externally verifiable via included \texttt{verify\_receipt.py}.
+
+\bibitem{slsa-v1}
+{Open Source Security Foundation},
+\emph{Supply-chain Levels for Software Artifacts (SLSA) Specification, Version 1.0}, 2023.
+\url{https://slsa.dev/spec/v1.0/}
+
+\bibitem{rekt}
+Rekt News,
+\emph{Leaderboard of public DeFi exploit losses}, 2024--2026.
+\url{https://rekt.news/leaderboard/}
+
+\bibitem{defillama}
+DefiLlama,
+\emph{DeFi total value locked dashboard and historical incident data}.
+\url{https://defillama.com/}
+
+\bibitem{owasp}
+{OWASP Foundation},
+\emph{Smart Contract Top 10 (2025 Release)}, 2025.
+\url{https://owasp.org/www-project-smart-contract-top-10/}
+
+\bibitem{halborn-top100}
+Halborn,
+\emph{Top 100 DeFi Hacks Across Multiple Networks: Cumulative Loss Analysis}, technical report, 2024.
+
+\bibitem{slither}
+J.~Feist, G.~Grieco, and A.~Groce,
+\emph{Slither: A Static Analysis Framework For Smart Contracts}, in Proceedings of the 2nd International Workshop on Emerging Trends in Software Engineering for Blockchain (WETSEB), 2019.
+
+\bibitem{mythril}
+B.~Mueller,
+\emph{Mythril: A security analysis tool for Ethereum smart contracts}. ConsenSys Diligence, 2018--2026.
+\url{https://github.com/Consensys/mythril}
+
+\bibitem{halmos}
+a16z Crypto Research,
+\emph{Halmos: A symbolic bounded model checker for the EVM}.
+\url{https://github.com/a16z/halmos}
+
+\bibitem{certora}
+Certora,
+\emph{The Certora Prover}, formal verification platform documentation, 2020--2026.
+\url{https://www.certora.com/}
+
+\bibitem{kevm}
+E.~Hildenbrandt, M.~Saxena, N.~Rodrigues, X.~Zhu, P.~Daian, D.~Guth, B.~Moore, D.~Park, Y.~Zhang, A.~Stefanescu, and G.~Ro\c{s}u,
+\emph{KEVM: A Complete Formal Semantics of the Ethereum Virtual Machine}, in 2018 IEEE 31st Computer Security Foundations Symposium (CSF), pp.~204--217, 2018.
+Project repository: \url{https://github.com/runtimeverification/evm-semantics}.
+
+\bibitem{noninterference}
+J.~A.\ Goguen and J.~Meseguer,
+\emph{Security Policies and Security Models}, in Proceedings of the 1982 IEEE Symposium on Security and Privacy, pp.~11--20, 1982.
+
+\bibitem{ca}
+Y.~Bai et al.,
+\emph{Constitutional AI: Harmlessness from AI Feedback}, technical report, Anthropic, 2022.
+\url{https://arxiv.org/abs/2212.08073}
+
+
+\bibitem{parallax5coordinator}
+B.~P.\ Duncan,
+\emph{parallax5\_coordinator: Compositional smart-contract verification via PARALLAX-5 obligation mapping}, 2026.
+Open-source Python package; ships with TOOL-MAPPING v1.0 calibration artifact.
+
+\end{thebibliography}
+
+\appendix
+
+\clearpage
+
+\section{A Quantitative Risk Framework}\label{sec:economics}
+
+The PARALLAX-5 compliance ladder admits a principled actuarial framework whose detailed calibration, market-sizing analysis, and per-protocol premium estimates are outside the scope of this academic paper and are deferred to a companion document. We give here only the framework sketch sufficient to demonstrate that the certificate's CROPS vector and obligation-depth assignment carry information useful for underwriting, without taking positions on actuarial assumptions or naming specific protocols.
+
+Let $r_b$ be a baseline annual incident rate per dollar of TVL (empirically calibrable on the catalog), and let $c_L \in [0, 1]$ be the coverage fraction at compliance level $L$ — the fraction of basis-observable losses prevented in expectation at that level. Then the expected annual loss for a protocol with TVL $V$ and compliance level $L$ is approximately
+\begin{equation*}
+\mathbb{E}[\mathrm{Loss}_L] \approx r_b V \left[ f_{\Omega_{\mathrm{chain}}}(1 - c_L) + f_{\Omega_{\mathrm{config}}}(1 - c_L^{\mathrm{cfg}}) + f_{\mathrm{irreducible}} \right]
+\end{equation*}
+with $(f_{\Omega_{\mathrm{chain}}}, f_{\Omega_{\mathrm{config}}}, f_{\mathrm{irreducible}}) = (0.603, 0.229, 0.167)$ from the unified loss ledger (Table~\ref{tab:loss-ledger}). The model structure is informative: compliance at $L \geq P_3$ reduces expected loss roughly by the chain-observable share weighted by coverage; the irreducible share is unaffected by compliance level and provides the residual loss floor.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{4.5cm}cp{6.5cm}}
+\toprule
+Archetype & Indicative level & Reasoning \\
+\midrule
+Large lending protocol & $P_2$ & $A_1$, $A_2$ verified; $A_5$ oracle dependency \\
+AMM core (constant-product) & $P_3$ & $A_1$ invariant verified; no external oracles \\
+Liquid staking protocol & $P_2$ & $A_5$ (oracle / operator quorum) is primary dependency \\
+Stablecoin / CDP system & $P_3$ & $A_1$ solvency verified; $A_5$ quorum on oracles \\
+Lending protocol (modular markets) & $P_3$ & $A_1$ per-market; $A_5$ oracle adapters \\
+Greenfield, no prior audit & $P_0$--$P_1$ & no obligation coverage; static analysis only \\
+PARALLAX-deployed protocol & $P_4$--$P_5$ & basis-complete static coverage with formal proof \\
+\bottomrule
+\end{tabular}
+\caption{Archetype-level indicative compliance assignments. These are framework-level archetypes, not protocol ratings; concrete protocol-specific assessments require engagement with the protocol's audit history, present-day code, and operational posture. The PARALLAX-5 paper takes no position on the present-day compliance level of any specific named protocol; doing so requires the protocol's participation in a certificate issuance process and is the proper subject of underwriting practice rather than academic prose.}\label{tab:risk-archetypes}
+\end{table}
+
+The certificate's $\mathrm{CROPS}$ vector and obligation-depth assignment supply the inputs an underwriter needs to evaluate $c_L$ at the protocol level; the framework is parameterized so that insurers and risk teams can substitute their own loss-history priors. Market sizing, take-rate analysis, and premium calibration against any specific protocol are deferred to a separate business document and are not endorsed by this paper. The framework establishes only that the substrate's outputs are sufficient to support such analysis when undertaken with the appropriate actuarial discipline.
+
+
+\paragraph{DOI identity.} The DOI \texttt{10.5281/zenodo.20386868} refers to the \emph{verification artifact} (the EVMYulLean integration Lean kernel run with the receipt and Ed25519 attestation), not to this paper. This artifact is the deposit on whose existence the abstract's interface-transport claim depends. The paper itself, when deposited to Zenodo, will receive its own DOI; the paper deposit will cite the verification-artifact DOI as a related identifier. Readers seeking the verification artifact should retrieve it from Zenodo at the cited DOI; readers seeking the paper or the substrate's source repository should consult \url{https://github.com/aquaursa/parallax-5}.
+
+The complete artifact---Z3 models, halmos test contracts, Lean 4 module, SMT-LIB exports, empirical catalog with sources and confidence labels (\texttt{paper/supplement/catalog.csv}), three demos, PARALLAX-5 reference CLI validator, JSON Schema, example certificate, and verification recipe \texttt{RUN\_VERIFICATION.sh}---is available at the public repository \url{https://github.com/aquaursa/parallax-5}. All 95 Lean theorems compile clean without \texttt{sorry}; all 129 Python fire tests pass; all halmos symbolic-execution verdicts reproduce; all 19 CROPS tests pass; the 2{,}152 compositional theorem checks pass; the CLI validator accepts the canonical example and rejects deliberately-broken certificates; the three demos run end-to-end via \texttt{make demo-all}; on commodity hardware the full self-test completes in under 30 seconds. A clean-room reproducibility log is included with the deposit as \texttt{REPRODUCIBILITY\_LOG.txt}.
+
+
+
+
+\clearpage
+
+\section{Codebook Inter-Rater Agreement}\label{sec:inter-rater}
+
+As a disciplined internal lower bound, we implement a codebook-driven inter-rater agreement harness at \texttt{parallax/formal/inter\_rater.py} and report Cohen's $\kappa$ from two independent automated reasoning orders on the 53-incident catalog:
+
+\begin{itemize}
+\item Classifier A reasons root-cause first, then infers observability.
+\item Classifier B reasons obligation-signature first, then infers observability.
+\end{itemize}
+
+These are codebook-faithful but independent: A starts from the \texttt{root\_cause\_class} field and applies decision rules; B starts from the \texttt{axiom\_violations} field and applies different decision rules.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Comparison & Cohen's $\kappa$ & Percent agreement \\
+\midrule
+A vs B (independent reasoning orders) & 0.334 (fair) & 73.6\% \\
+A vs catalog (codebook recovery) & 0.582 (moderate) & 86.8\% \\
+B vs catalog (codebook recovery) & 0.579 (moderate) & 83.0\% \\
+\bottomrule
+\end{tabular}
+\caption{Codebook-driven inter-rater agreement on the 53-incident catalog. The two automated classifiers achieve \emph{fair} agreement with each other ($\kappa = 0.334$) and \emph{moderate} agreement against the catalog. The 14 disagreements between A and B are concentrated in the \emph{ambiguous} category, where the codebook itself admits multiple defensible classifications --- a genuine empirical finding that we surface rather than hide.}\label{tab:inter-rater}
+\end{table}
+
+This is \emph{not} a substitute for human inter-rater validation, which we identify as the next external step. It is a disciplined internal lower bound, more precisely framed as \emph{internal codebook recoverability}: the catalog is roughly 85\% recoverable from codebook rules alone, with the residual disagreement concentrated in cases where the rater's choice of reasoning order matters.
+
+\paragraph{Concrete plan for external human classification review.} We commit to the following procedure. (i)~Recruit two independent classifiers with prior smart-contract security experience (e.g., audit-firm associates, academic researchers), blinded to each other's outputs and to the catalog's existing classifications. (ii)~Each classifier independently re-classifies a stratified random sample of $n = 25$ incidents drawn from the catalog, using only \texttt{paper/CLASSIFICATION\_CODEBOOK.md} as their procedure. (iii)~Compute Cohen's $\kappa$ between the two human classifiers, between each human and the catalog, and between the human pair and the automated reasoning-order pair (Classifier A / Classifier B above). (iv)~Pre-register the expected agreement thresholds: $\kappa_{\mathrm{human-human}} \geq 0.6$ (substantial) is a success criterion, $0.4 \leq \kappa < 0.6$ (moderate) requires codebook refinement, and $\kappa < 0.4$ falsifies the codebook's usability claim. (v)~Publish the per-incident classifications and full Cohen's $\kappa$ analyses, including per-axis breakdowns (root cause; basis-observability; observation-set assignment). The protocol is documented at \texttt{paper/INTER\_RATER\_PROTOCOL.md}; the recruiting and execution are part of the substrate's open follow-on work.
+
+\clearpage
+
+\section{Protocol Archetypes}\label{app:archetypes}
+
+To validate framework operability on real systems without protocol-team engagement, we apply PARALLAX-5 to five protocol \emph{archetypes} representative of the DeFi landscape. These are not endorsements or formal ratings of specific named protocols; they are pedagogical mappings illustrating the per-archetype obligation structure. Concrete named applications are deferred to the business companion document for protocols that opt in.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{4.5cm}cp{6.5cm}}
+\toprule
+Archetype & Indicative level & Distinguishing obligations \\
+\midrule
+Large lending protocol & P2 & A1, A2 verified; A5 oracle dependency \\
+AMM core (constant-product) & P3 & A1 invariant Certora-verified, no external oracles \\
+Liquid staking protocol & P2 & A5 (oracle / operator quorum) is primary dependency \\
+Stablecoin / CDP system & P3 & A1 solvency verified; A5 quorum on oracles \\
+Lending protocol (modular markets) & P3 & A1 per-market; A5 oracle adapters \\
+\bottomrule
+\end{tabular}
+\caption{Archetype P-level mappings. These illustrate the framework's per-archetype obligation structure; they are not specific protocol ratings. Each archetype's emphasized obligations should drive its certificate's \texttt{proof\_artifacts} section. Five archetype certificate sketches (legacy v8-era schema) are at \texttt{paper/supplement/real\_protocols/*.json}; these document the framework's per-archetype obligation structure but predate Certificate Schema v1.0 and do not validate against it. v1.0-validating examples are at \texttt{examples/certificate\_uniswap\_v3\_core.json}, with additional examples at \texttt{demos/*/output/certificate.json}. Concrete v1.0-conforming named-protocol assessments require protocol-team engagement and are deferred to the business companion document.}\label{tab:archetypes}
+\end{table}
+
+The archetype catalog illustrates that the framework is operational on real systems, not just toy examples. The exercise surfaces the natural revalidation cadence (90--180 days, faster on governance upgrades) and the per-archetype set of trust-base controls.
+
+
+
+
+
+\clearpage
+
+\section{Artifact Map}\label{app:artifact}
+
+The full artifact map is published as \texttt{ARTIFACT\_MAP.md} (Markdown) and \texttt{artifact\_map.json} (machine-readable) in the repository root. The table below summarizes the artifact groups with their headline counts and the verification command that establishes each group's central claim. Per-file detail is in the supplements.
+
+\begin{table}[h]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{4.2cm}p{4.5cm}p{5.5cm}}
+\toprule
+\textbf{Artifact group} & \textbf{Headline counts} & \textbf{Verification command} \\
+\midrule
+Formal core (v8 carryover) & 95 Lean theorems, 0 \texttt{sorry}; 129 fire tests; 53-incident catalog; 4 halmos archetype pairs & \texttt{./parallax/formal/lean/verify.sh} \\
+\addlinespace
+Substrate foundations & 11-article Charter; 4-type Fork Protocol; 19-field schema; 6 Walkaway theorems; CROPS v1.0.1 (19 tests) & \texttt{python -m parallax5\_coordinator.theorems}; \texttt{python tests/test\_crops.py} \\
+\addlinespace
+Worked examples & 3 demos (vault, bridge, agent gate); 4 Lean files, 21 theorems, 0 \texttt{sorry} combined; 3 validated certificates & \texttt{make demo-all} \\
+\addlinespace
+Onchain certificate registry & \texttt{ParallaxRegistry.sol} (Apache-2.0); 24 Foundry tests pass; \texttt{Registry.lean} 6 theorems 0 \texttt{sorry}; Python client + CLI integration & \texttt{cd registry \&\& forge test}; \texttt{./scripts/deploy.sh anvil} \\
+\addlinespace
+Coordinator and CLI & 12 unified subcommands (6 v9 + 6 v8); 2{,}152 compositional checks & \texttt{parallax5 --help}; \texttt{python -m parallax5\_coordinator.theorems} \\
+\addlinespace
+Paper (this document) & 46 pages; 25 theorem labels, 19 definition labels & \texttt{cd paper \&\& pdflatex parallax-5\_v9\_2.tex} \\
+\addlinespace
+Full pipeline & all of the above & \texttt{./RUN\_VERIFICATION.sh} \\
+\bottomrule
+\end{tabular}
+\caption{Artifact-group summary. The detailed per-file map (file paths, Lean line counts, certificate fingerprints, halmos witness inputs) is in \texttt{ARTIFACT\_MAP.md} at the repository root, with a machine-readable JSON variant at \texttt{artifact\_map.json}. Splitting the detail out of the PDF keeps both representations renderable without clipping and ensures the machine-readable form is canonical.}\label{tab:artifact-summary}
+\end{table}
+
+\end{document}

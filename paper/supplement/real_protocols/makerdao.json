@@ -1,0 +1,116 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-makerdao-2026-05-25",
+  "protocol_id": "MakerDAO Dai Stablecoin System (Multi-Collateral Dai)",
+  "compliance_level": "P3",
+  "_classification_note": "Speculative classification. MakerDAO has substantial formal verification artifacts via Maker Smart Contract Verifications. Vat (core ledger) has been Certora-verified for invariants.",
+  "artifacts": {
+    "source_repo": "github.com/makerdao/dss",
+    "commit_hash": "0000000000000000000000000000000000000000",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "obligation_map": {
+    "frob(bytes32,address,address,address,int256,int256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "fork(bytes32,address,address,int256,int256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "grab(bytes32,address,address,address,int256,int256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "flap(uint256,uint256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "flop(uint256,uint256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "drip()": [
+      "A1",
+      "A5"
+    ]
+  },
+  "proof_artifacts": {
+    "A1": {
+      "tool": "Certora",
+      "version": "7.0.0",
+      "verdict": "PASS",
+      "rule_id": "vat_solvency_invariant",
+      "artifact_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "A4": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 24,
+      "artifact_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "A2": {
+      "tool": "Certora",
+      "version": "1.0.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:00000000000000000000000000000000000000000000000000000000000000a2"
+    },
+    "A5": {
+      "tool": "halmos",
+      "version": "1.0.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:00000000000000000000000000000000000000000000000000000000000000a5"
+    }
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "MKR governance token holders",
+        "GSM Pause (4-hour delay)"
+      ]
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "spell-based governance proposals",
+        "executive vote with delay"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "multiple medianizer feeds per collateral",
+        "OSM (Oracle Security Module) 1-hour delay"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "PSM (Peg Stability Module) requires separate certificate",
+    "Auction keeper infrastructure out of scope"
+  ],
+  "revalidation_triggers": [
+    "new collateral type",
+    "spell execution",
+    "90 days elapsed"
+  ],
+  "issued_at": "2026-05-25T00:00:00Z",
+  "expires_at": "2026-08-25T00:00:00Z",
+  "issuer": {
+    "name": "PARALLAX-5 Paper Authors (speculative)",
+    "did": "did:web:parallax5.org",
+    "signature": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+  },
+  "_schema_note": "Legacy v8-era schema sketch. Does NOT validate against Certificate Schema v1.0. See paper/supplement/real_protocols/README.md for context. v1.0-validating examples are in examples/ and demos/*/output/."
+}

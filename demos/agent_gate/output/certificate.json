@@ -1,0 +1,127 @@
+{
+  "schema_version": "parallax5-certificate-v1.0",
+  "certificate_id": "c705b024-e1be-4130-a3fc-91b7a0c8ebd6",
+  "protocol": {
+    "name": "PARALLAX-5 Demo 3 \u2014 RuntimeGate",
+    "version": "1.0.0",
+    "identifier": "parallax5_coordinator/demos/agent_gate",
+    "category": "agent"
+  },
+  "artifact": {
+    "source_hash": "sha256:987d6bcc031efa11512f2a4343adf4fb2e072a218bffd0236334302eca1ebd98"
+  },
+  "deployment": [],
+  "mapping": {
+    "namespace": "tool-mapping/aquaursa-v1",
+    "version": "1.0.0",
+    "doi": "10.5281/zenodo.20386868"
+  },
+  "trust_base": {
+    "ecdsa_euf_cma": false,
+    "evm_yul_lean_refinement": true,
+    "assumptions": [
+      "TargetVault.agentManager is the gate contract address (set at vault construction, immutable thereafter)",
+      "Solidity 0.8.20 integer overflow checks are sound",
+      "block.timestamp drift is bounded by Ethereum consensus rules (\u226415s)",
+      "The agentKey may be arbitrarily adversarial (jailbroken, compromised, hallucinating); the gate's guarantees are over the agent's BEHAVIOR space, not its INTENT"
+    ]
+  },
+  "obligation_coverage": {
+    "A1": {
+      "depth": 5,
+      "evidence_refs": [
+        "evidence-ext-001"
+      ]
+    },
+    "A2": {
+      "depth": 5,
+      "evidence_refs": [
+        "evidence-ext-002"
+      ]
+    },
+    "A3": {
+      "depth": 0,
+      "evidence_refs": []
+    },
+    "A4": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-ext-003"
+      ]
+    },
+    "A5": {
+      "depth": 0,
+      "evidence_refs": []
+    }
+  },
+  "crops_vector": {
+    "C": 5,
+    "R": 5,
+    "O": 5,
+    "P": 0,
+    "S": 5,
+    "computation_method": "max_within_dimension"
+  },
+  "walkaway": {
+    "classification": "bounded",
+    "proof_ref": "demos/agent_gate/proof/Containment.lean",
+    "explanation": "RuntimeGate has no admin role, no proxy pattern, no upgrade path. maxOutflowPercent, whitelistedSpenders, agentKey, and vault are all immutable post-construction. The bounded (not full) classification reflects that the GATED protocol stack (TargetVault) has an owner \u2014 the user \u2014 who can withdraw funds at will. This is correct: the user retains exit. The agent's authority is bounded by the gate's predicates; the user's authority is unbounded by design (they own their vault). The walkaway is bounded by the fact that the agent's authority cannot be removed without redeploying \u2014 there is no key-rotation function. In practice this is acceptable because the gate's predicates already foreclose the most dangerous agent actions.",
+    "dependencies_disclosed": [
+      "TargetVault must be deployed with agentManager set to this gate's address; if set to anything else, the gate's predicates are not enforced",
+      "The gate enforces predicates on the agent's calls to itself; it cannot prevent calls made directly to the vault by an entity that has somehow acquired vault.agentManager privileges (which by construction is only this gate)"
+    ]
+  },
+  "evidence": [
+    {
+      "evidence_id": "evidence-ext-001",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "ai_agent_containment_a1",
+      "obligation_mapped_to": "A1",
+      "depth_contribution": 5,
+      "justification": "Lean 4 theorem gate_bounds_single_transfer in demos/agent_gate/proof/Containment.lean establishes that any applied transfer is bounded by maxOutflowPercent * vaultBalance / 100. The theorem holds for ANY agent behavior \u2014 adversarial or honest. D5 (runtime enforced) because the gate's check is not me"
+    },
+    {
+      "evidence_id": "evidence-ext-002",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "ai_agent_containment_a2",
+      "obligation_mapped_to": "A2",
+      "depth_contribution": 5,
+      "justification": "Lean 4 theorems gate_enforces_whitelist and gate_bounds_approval establish that any applied approve is to a whitelisted spender AND bounded by maxApproval. The whitelist is immutable post-construction. D5 because enforcement is at transaction submission time. Zero sorry."
+    },
+    {
+      "evidence_id": "evidence-ext-003",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "daily_budget_temporal_distinctness",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 4,
+      "justification": "The gate's dailyOutflow + dailyOutflowResetTime tracking provides temporal distinctness for the daily-budget invariant. The Lean theorem gate_single_step_containment establishes per-step correctness; the daily-budget extension is verified via the simulate.py state machine."
+    }
+  ],
+  "issuer": {
+    "name": "AquaUrsa Research (PARALLAX-5 Demo 3)",
+    "public_key": "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c"
+  },
+  "issuance": {
+    "timestamp": "2026-05-26T17:08:15.078770+00:00",
+    "issuance_method": "automated_pipeline",
+    "human_review": false,
+    "notes": "Issued by parallax5 certify subcommand"
+  },
+  "validity": {
+    "valid_from": "2026-05-26T17:08:15.078770+00:00",
+    "valid_until": "2026-11-22T17:08:15.078770+00:00",
+    "revalidation_triggers": [
+      "contract_upgrade",
+      "compiler_change",
+      "manual"
+    ]
+  },
+  "supersession": null,
+  "revocation": null,
+  "challenges": [],
+  "fingerprint": "a6cc733181db981c97e4db2eeb1e10cc3f0a891ae1d4b3297a61cbc58bdf5cdf",
+  "signature": "aebe91c87bc6655585544f2322cd32c9683b9f5dad9a2b1753b14a6499e1227bedd0e0475f4fdfa796dc8a4ba858f0d16b8ec1d96abcb5e9fd5f1b5d89b17e9f"
+}

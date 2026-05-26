@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://parallax5.org/schemas/certificate/v1.0",
+  "title": "PARALLAX-5 Certificate",
+  "description": "Machine-checkable security certificate for value-bearing smart contracts conforming to the PARALLAX-5 standard.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "certificate_id",
+    "protocol_id",
+    "compliance_level",
+    "artifacts",
+    "obligation_map",
+    "trust_base_assumptions",
+    "revalidation_triggers",
+    "issued_at",
+    "expires_at",
+    "issuer"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "PARALLAX-5/1.0"
+    },
+    "certificate_id": {
+      "type": "string",
+      "pattern": "^p5cert-[A-Za-z0-9_-]+-\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "protocol_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compliance_level": {
+      "type": "string",
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5"
+      ]
+    },
+    "artifacts": {
+      "type": "object",
+      "required": [
+        "source_repo",
+        "commit_hash",
+        "deployed_addresses",
+        "bytecode_hashes"
+      ],
+      "properties": {
+        "source_repo": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "commit_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{40,64}$"
+        },
+        "deployed_addresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "chain_id",
+              "address"
+            ],
+            "properties": {
+              "chain_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "address": {
+                "type": "string",
+                "pattern": "^0x[0-9a-fA-F]{40}$"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "bytecode_hashes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          }
+        }
+      }
+    },
+    "obligation_map": {
+      "type": "object",
+      "description": "Map from function signature to list of obligations that apply.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A5"
+          ]
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
+    "proof_artifacts": {
+      "type": "object",
+      "description": "Required for P3+. Maps each obligation to its proof artifact.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "tool",
+          "version",
+          "verdict",
+          "artifact_hash"
+        ],
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "Slither",
+              "halmos",
+              "Certora",
+              "Lean4",
+              "Coq",
+              "Mythril",
+              "Manticore",
+              "Z3",
+              "CVC5",
+              "Yices2",
+              "ObligationSol",
+              "other"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "PASS",
+              "FAIL",
+              "TIMEOUT",
+              "UNKNOWN"
+            ]
+          },
+          "artifact_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-fA-F]{64}$"
+          },
+          "paths_explored": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "rule_id": {
+            "type": "string"
+          },
+          "theorem_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "trust_base_assumptions": {
+      "type": "object",
+      "required": [
+        "OA1_key_integrity",
+        "OA2_signer_sovereignty",
+        "OA3_infrastructure_integrity"
+      ],
+      "properties": {
+        "OA1_key_integrity": {
+          "type": "object",
+          "required": [
+            "controls"
+          ],
+          "properties": {
+            "controls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "auditor": {
+              "type": "string"
+            }
+          }
+        },
+        "OA2_signer_sovereignty": {
+          "type": "object",
+          "required": [
+            "controls"
+          ],
+          "properties": {
+            "controls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        "OA3_infrastructure_integrity": {
+          "type": "object",
+          "required": [
+            "controls"
+          ],
+          "properties": {
+            "controls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "runtime_gate": {
+      "type": "object",
+      "description": "Required for P5. The deployed step-secure gate.",
+      "required": [
+        "address",
+        "configuration_hash"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "configuration_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-fA-F]{64}$"
+        }
+      }
+    },
+    "known_exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revalidation_triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "object",
+      "required": [
+        "name",
+        "did",
+        "signature"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string",
+          "pattern": "^did:"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]+$"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "compliance_level": {
+            "enum": [
+              "P3",
+              "P4",
+              "P5"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "proof_artifacts"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compliance_level": {
+            "const": "P5"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "runtime_gate"
+        ]
+      }
+    }
+  ]
+}

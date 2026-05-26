@@ -1,0 +1,188 @@
+{
+  "mode": "replay",
+  "initial_state": {
+    "total_assets": 10000,
+    "total_shares": 10000,
+    "owner": "0xOWNER",
+    "caller": "0xOWNER",
+    "call_depth": 0,
+    "block_time": 1700000000,
+    "oracle_price": 200000,
+    "oracle_updated_at": 1699999700,
+    "min_liquidity": 1000
+  },
+  "history": [
+    {
+      "attempt": 1,
+      "proposal": {
+        "caller": "0xATTACKER",
+        "total_assets_delta": -10000,
+        "total_shares_delta": 0,
+        "call_depth": 0,
+        "oracle_age_seconds": 0,
+        "rationale": "Attempt direct drain as attacker"
+      },
+      "accepted": false,
+      "rejected_obligations": [
+        "StateSecure(post)",
+        "A1"
+      ],
+      "post_state": {
+        "total_assets": 10000,
+        "total_shares": 10000,
+        "owner": "0xOWNER",
+        "caller": "0xOWNER",
+        "call_depth": 0,
+        "block_time": 1700000000,
+        "oracle_price": 200000,
+        "oracle_updated_at": 1699999700,
+        "min_liquidity": 1000
+      },
+      "rationale": "Attempt direct drain as attacker"
+    },
+    {
+      "attempt": 2,
+      "proposal": {
+        "caller": "0xATTACKER",
+        "total_assets_delta": 0,
+        "total_shares_delta": 1000000,
+        "call_depth": 0,
+        "oracle_age_seconds": 0,
+        "rationale": "Mint shares without backing"
+      },
+      "accepted": false,
+      "rejected_obligations": [
+        "A1"
+      ],
+      "post_state": {
+        "total_assets": 10000,
+        "total_shares": 10000,
+        "owner": "0xOWNER",
+        "caller": "0xOWNER",
+        "call_depth": 0,
+        "block_time": 1700000000,
+        "oracle_price": 200000,
+        "oracle_updated_at": 1699999700,
+        "min_liquidity": 1000
+      },
+      "rationale": "Mint shares without backing"
+    },
+    {
+      "attempt": 3,
+      "proposal": {
+        "caller": "0xOWNER",
+        "total_assets_delta": -5000,
+        "total_shares_delta": 0,
+        "call_depth": 3,
+        "oracle_age_seconds": 0,
+        "rationale": "Reentrant call from owner"
+      },
+      "accepted": false,
+      "rejected_obligations": [
+        "StateSecure(post)",
+        "A1"
+      ],
+      "post_state": {
+        "total_assets": 10000,
+        "total_shares": 10000,
+        "owner": "0xOWNER",
+        "caller": "0xOWNER",
+        "call_depth": 0,
+        "block_time": 1700000000,
+        "oracle_price": 200000,
+        "oracle_updated_at": 1699999700,
+        "min_liquidity": 1000
+      },
+      "rationale": "Reentrant call from owner"
+    },
+    {
+      "attempt": 4,
+      "proposal": {
+        "caller": "0xOWNER",
+        "total_assets_delta": 500,
+        "total_shares_delta": 500,
+        "call_depth": 0,
+        "oracle_age_seconds": 5400,
+        "rationale": "Stale oracle exploit"
+      },
+      "accepted": false,
+      "rejected_obligations": [
+        "StateSecure(post)",
+        "A5"
+      ],
+      "post_state": {
+        "total_assets": 10000,
+        "total_shares": 10000,
+        "owner": "0xOWNER",
+        "caller": "0xOWNER",
+        "call_depth": 0,
+        "block_time": 1700000000,
+        "oracle_price": 200000,
+        "oracle_updated_at": 1699999700,
+        "min_liquidity": 1000
+      },
+      "rationale": "Stale oracle exploit"
+    },
+    {
+      "attempt": 5,
+      "proposal": {
+        "caller": "0xATTACKER",
+        "total_assets_delta": 0,
+        "total_shares_delta": 100,
+        "call_depth": 0,
+        "oracle_age_seconds": 0,
+        "rationale": "Try to mint a tiny number of shares without auth"
+      },
+      "accepted": false,
+      "rejected_obligations": [
+        "A1"
+      ],
+      "post_state": {
+        "total_assets": 10000,
+        "total_shares": 10000,
+        "owner": "0xOWNER",
+        "caller": "0xOWNER",
+        "call_depth": 0,
+        "block_time": 1700000000,
+        "oracle_price": 200000,
+        "oracle_updated_at": 1699999700,
+        "min_liquidity": 1000
+      },
+      "rationale": "Try to mint a tiny number of shares without auth"
+    },
+    {
+      "attempt": 6,
+      "proposal": {
+        "caller": "0xOWNER",
+        "total_assets_delta": 1000,
+        "total_shares_delta": 1000,
+        "call_depth": 0,
+        "oracle_age_seconds": 0,
+        "rationale": "Legitimate proportional deposit by owner"
+      },
+      "accepted": true,
+      "rejected_obligations": [],
+      "post_state": {
+        "total_assets": 11000,
+        "total_shares": 11000,
+        "owner": "0xOWNER",
+        "caller": "0xOWNER",
+        "call_depth": 0,
+        "block_time": 1700000000,
+        "oracle_price": 200000,
+        "oracle_updated_at": 1700000000,
+        "min_liquidity": 1000
+      },
+      "rationale": "Legitimate proportional deposit by owner"
+    }
+  ],
+  "summary": {
+    "accepted": 1,
+    "rejected": 5
+  },
+  "lean_theorems_verified": [
+    "basis_gate_state_safety",
+    "basis_gate_transition_safety",
+    "adaptive_iteration_preserves_security"
+  ]
+}

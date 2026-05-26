@@ -1,0 +1,90 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-aave-v3-2026-05-25",
+  "protocol_id": "Aave V3 (Ethereum)",
+  "compliance_level": "P2",
+  "_classification_note": "Speculative classification by paper authors. Based on public audit reports and on-chain code review. Not endorsed by Aave Labs.",
+  "artifacts": {
+    "source_repo": "github.com/aave-dao/aave-v3-origin",
+    "commit_hash": "0000000000000000000000000000000000000000",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "obligation_map": {
+    "supply(address,uint256,address,uint16)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "withdraw(address,uint256,address)": [
+      "A1",
+      "A2",
+      "A4",
+      "A5"
+    ],
+    "borrow(address,uint256,uint256,uint16,address)": [
+      "A1",
+      "A2",
+      "A4",
+      "A5"
+    ],
+    "repay(address,uint256,uint256,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "liquidationCall(address,address,address,uint256,bool)": [
+      "A1",
+      "A2",
+      "A4",
+      "A5"
+    ],
+    "setReserveActive(address,bool)": [
+      "A2"
+    ]
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "Aave Governance multisig",
+        "Chainlink Keepers separation"
+      ]
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "governance proposal delay (1 day)",
+        "executor timelock"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "multi-source price oracle aggregation",
+        "independent oracle network (Chainlink)"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "Cross-chain bridge components require separate certificate per chain",
+    "Liquidation bot infrastructure out of scope"
+  ],
+  "revalidation_triggers": [
+    "governance upgrade",
+    "oracle source change",
+    "90 days elapsed"
+  ],
+  "issued_at": "2026-05-25T00:00:00Z",
+  "expires_at": "2026-08-25T00:00:00Z",
+  "issuer": {
+    "name": "PARALLAX-5 Paper Authors (speculative)",
+    "did": "did:web:parallax5.org",
+    "signature": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+  },
+  "_schema_note": "Legacy v8-era schema sketch. Does NOT validate against Certificate Schema v1.0. See paper/supplement/real_protocols/README.md for context. v1.0-validating examples are in examples/ and demos/*/output/."
+}

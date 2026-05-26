@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use PARALLAX-5 in academic work, please cite both the paper and the verification artifact."
+type: software
+title: "PARALLAX-5: A Five-Obligation Substrate for Smart Contracts and AI Agents"
+abstract: >-
+  PARALLAX-5 is a transition-level obligation interface for value-bearing
+  decentralized systems. Five primitive obligations (value conservation,
+  authorization closure, signature integrity, temporal distinctness,
+  external-attestation trust) decompose smart-contract safety. Under an
+  explicit security-interface adequacy condition, every trust-base-respecting
+  loss-inducing transition has a non-empty violation signature. Mechanized
+  in Lean 4 (95 theorems, zero sorry), validated against a 53-incident
+  empirical catalog ($5.97 B aggregate losses), and refined to a production
+  EVM semantics via EvmYulLean.
+authors:
+  - name: "AquaUrsa Research"
+    website: "https://aquaursa.io"
+version: "1.0.0"
+date-released: 2026-05-26
+license:
+  - CC-BY-4.0
+  - Apache-2.0
+  - CC0-1.0
+repository-code: "https://github.com/aquaursa/parallax-5"
+url: "https://doi.org/10.5281/zenodo.20400525"
+doi: 10.5281/zenodo.20400525
+keywords:
+  - formal verification
+  - Lean 4
+  - EVM
+  - smart contract security
+  - DeFi
+  - AI agents
+  - runtime gates
+  - external attestation
+references:
+  - type: software
+    title: "PARALLAX-5 / EVMYulLean Integration Verification"
+    doi: 10.5281/zenodo.20386868
+    notes: "Companion verification artifact."

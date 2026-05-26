@@ -1,0 +1,72 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-lido-2026-05-25",
+  "protocol_id": "Lido (Ethereum)",
+  "compliance_level": "P2",
+  "_classification_note": "Speculative classification. Lido has multiple validator oracle layers; the oracle quorum / freshness is a primary A5 concern.",
+  "artifacts": {
+    "source_repo": "github.com/lidofinance/lido-dao",
+    "commit_hash": "0000000000000000000000000000000000000000",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "obligation_map": {
+    "submit(address)": [
+      "A1",
+      "A4"
+    ],
+    "withdraw(uint256[],uint256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "handleOracleReport(...)": [
+      "A5"
+    ]
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "operator key custody program",
+        "validator key rotation"
+      ]
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "LDO governance token",
+        "council multisig with delay"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "9 distinct oracle daemons",
+        "5-of-9 quorum",
+        "operator vetting"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "Validator slashing risk is operational, not on-chain code",
+    "withdrawal queue / wstETH wrapping is a separate certificate"
+  ],
+  "revalidation_triggers": [
+    "oracle set change",
+    "withdrawal mode parameters change",
+    "90 days elapsed"
+  ],
+  "issued_at": "2026-05-25T00:00:00Z",
+  "expires_at": "2026-08-25T00:00:00Z",
+  "issuer": {
+    "name": "PARALLAX-5 Paper Authors (speculative)",
+    "did": "did:web:parallax5.org",
+    "signature": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+  },
+  "_schema_note": "Legacy v8-era schema sketch. Does NOT validate against Certificate Schema v1.0. See paper/supplement/real_protocols/README.md for context. v1.0-validating examples are in examples/ and demos/*/output/."
+}

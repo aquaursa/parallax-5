@@ -1,0 +1,104 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-example-vault-2026-05-25",
+  "protocol_id": "ExampleVault v2.0.0",
+  "compliance_level": "P3",
+  "artifacts": {
+    "source_repo": "github.com/example-finance/vault",
+    "commit_hash": "1234567890abcdef1234567890abcdef12345678",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0xabababababababababababababababababababab"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0xabababababababababababababababababababababababababababababababab"
+    }
+  },
+  "obligation_map": {
+    "deposit(uint256,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "withdraw(uint256,address,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "mint(uint256,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "redeem(uint256,address,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ]
+  },
+  "proof_artifacts": {
+    "A1": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 14,
+      "artifact_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "_findings_addressed": [
+        "TOB-VAULT-001"
+      ]
+    },
+    "A2": {
+      "tool": "Slither",
+      "version": "0.10.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "A4": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 8,
+      "artifact_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "_findings_addressed": [
+        "TOB-VAULT-002"
+      ]
+    }
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "multisig 4-of-7",
+        "hardware-secured signers"
+      ]
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "48h timelock on parameter changes",
+        "operator vetting"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "no external oracle dependency",
+        "no cross-chain bridge"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "ERC-20 token reentrancy guards rely on ERC-20 conformance of the underlying asset"
+  ],
+  "revalidation_triggers": [
+    "any contract upgrade",
+    "underlying asset change",
+    "180 days elapsed"
+  ],
+  "issued_at": "2026-05-25T00:00:00Z",
+  "expires_at": "2026-11-25T00:00:00Z",
+  "issuer": {
+    "name": "Trail of Bits (audit) + Example Finance (signing)",
+    "did": "did:web:examplefinance.io",
+    "signature": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

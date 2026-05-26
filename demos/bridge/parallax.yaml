@@ -1,0 +1,56 @@
+protocol:
+  name: PARALLAX-5 Demo 2 — PatchedBridge
+  version: 1.0.0
+  identifier: parallax5_coordinator/demos/bridge
+  category: bridge
+
+contract_source: contracts/PatchedBridge.sol
+tools: [slither]
+
+trust_base:
+  ecdsa_euf_cma: true
+  evm_yul_lean_refinement: true
+  assumptions:
+    - "secp256k1 ECDSA is EUF-CMA secure under canonical (low-s) signing"
+    - "Block timestamps cannot drift more than 15 seconds (per Ethereum consensus)"
+    - "Validator set rotation increments the validatorEpoch monotonically"
+    - "FRESHNESS_WINDOW = 3600 seconds is consensus-appropriate; longer windows would weaken A5"
+
+walkaway:
+  classification: bounded
+  proof_ref: "demos/bridge/proof/Attestation.lean"
+  explanation: "PatchedBridge has no upgrade path or admin function; validator set is established at construction. Validator rotation requires a NEW deployment with new epoch, not an in-place admin operation. The bridge does not have a 'pause' or 'drain' admin function. Classified bounded because the bridge depends on the validator set's continued existence (off-chain attestation infrastructure), but on-chain there is no irreplaceable role."
+  dependencies_disclosed:
+    - "Off-chain validator infrastructure must continue to attest withdrawals; if all validators disappear, deposits cannot be withdrawn (liveness concern, not safety)"
+
+external_evidence:
+  - obligation: A3
+    depth: 4
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: signature_integrity_theorem
+    justification: "Lean 4 proof in demos/bridge/proof/Attestation.lean establishes A3 (signature integrity) for PatchedBridge. Theorem patched_rejects_high_s shows that high-s signatures are rejected by the verifier, foreclosing the signature-malleability replay family. Zero sorry."
+  - obligation: A5
+    depth: 4
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: freshness_attestation_theorem
+    justification: "Lean 4 proofs in demos/bridge/proof/Attestation.lean (stale_attestation_rejected, future_attestation_rejected, epoch_rotation_breaks_replay) establish A5 (external attestation freshness). The bridge rejects stale and future attestations, and epoch rotation breaks replay across validator-set changes."
+  - obligation: A2
+    depth: 4
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: walkaway_bounded_theorem
+    justification: "PatchedBridge has no admin role; the walkaway property holds at bounded level per the bounded-walkaway lemma in lean/Parallax5/Walkaway.lean. Bounded rather than full because the bridge depends on off-chain validator infrastructure for liveness."
+
+source_openness_depth: 5
+privacy_primitives_depth: 0
+
+issuer:
+  name: "AquaUrsa Research (PARALLAX-5 Demo 2)"
+  public_key: "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c"
+
+mapping:
+  namespace: "tool-mapping/aquaursa-v1"
+  version: "1.0.0"
+  doi: "10.5281/zenodo.20386868"

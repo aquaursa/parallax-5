@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://parallax.xyz/schemas/certificate_v1.json",
+  "title": "PARALLAX-5 Certificate v1.0",
+  "description": "Machine-readable specification for PARALLAX-5 certificates. Companion to docs/CERTIFICATE_SCHEMA.md. License: CC0.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "certificate_id",
+    "protocol",
+    "artifact",
+    "mapping",
+    "trust_base",
+    "obligation_coverage",
+    "crops_vector",
+    "walkaway",
+    "evidence",
+    "issuer",
+    "issuance",
+    "validity",
+    "supersession",
+    "revocation",
+    "challenges",
+    "fingerprint",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "parallax5-certificate-v1.0"
+    },
+    "certificate_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "UUID v4"
+    },
+    "protocol": {
+      "type": "object",
+      "required": ["name", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 256},
+        "version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "identifier": {"type": "string", "format": "uri"},
+        "category": {
+          "type": "string",
+          "enum": ["amm", "lending", "bridge", "governance", "oracle", "vault", "agent", "other"]
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "bytecode_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "compiler": {"type": "string"},
+        "compiler_settings": {"type": "object"}
+      },
+      "anyOf": [
+        {"required": ["source_hash"]},
+        {"required": ["bytecode_hash"]}
+      ]
+    },
+    "deployment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["chain_id", "address"],
+        "additionalProperties": false,
+        "properties": {
+          "chain_id": {"type": "integer", "minimum": 1},
+          "chain_name": {"type": "string"},
+          "address": {"type": "string", "pattern": "^0x[0-9a-fA-F]{40}$"},
+          "deployed_at_block": {"type": "integer", "minimum": 0},
+          "deployer": {"type": "string", "pattern": "^0x[0-9a-fA-F]{40}$"}
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "required": ["namespace", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^tool-mapping/[a-z0-9_-]+-v[0-9]+$",
+          "description": "Per Fork Protocol Article 3: tool-mapping/{author}-v{major}"
+        },
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "doi": {"type": "string", "pattern": "^10\\.[0-9]+/.+$"},
+        "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "trust_base": {
+      "type": "object",
+      "required": ["assumptions"],
+      "properties": {
+        "ecdsa_euf_cma": {"type": "boolean"},
+        "evm_yul_lean_refinement": {"type": "boolean"},
+        "oracle_freshness_window_seconds": {"type": "integer", "minimum": 0},
+        "external_attestation_quorum": {"type": "string"},
+        "assumptions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Free-form list of additional security-interface assumptions. Empty array is invalid: explicit 'none' assumptions must be listed (e.g., 'no external oracle used')."
+        }
+      }
+    },
+    "obligation_coverage": {
+      "type": "object",
+      "required": ["A1", "A2", "A3", "A4", "A5"],
+      "additionalProperties": false,
+      "properties": {
+        "A1": {"$ref": "#/$defs/obligation_entry"},
+        "A2": {"$ref": "#/$defs/obligation_entry"},
+        "A3": {"$ref": "#/$defs/obligation_entry"},
+        "A4": {"$ref": "#/$defs/obligation_entry"},
+        "A5": {"$ref": "#/$defs/obligation_entry"}
+      }
+    },
+    "crops_vector": {
+      "type": "object",
+      "required": ["C", "R", "O", "P", "S"],
+      "additionalProperties": false,
+      "properties": {
+        "C": {"$ref": "#/$defs/depth"},
+        "R": {"$ref": "#/$defs/depth"},
+        "O": {"$ref": "#/$defs/depth"},
+        "P": {"$ref": "#/$defs/depth"},
+        "S": {"$ref": "#/$defs/depth"},
+        "computation_method": {
+          "type": "string",
+          "enum": ["max_within_dimension", "min_within_dimension", "weighted_average", "custom"]
+        }
+      }
+    },
+    "walkaway": {
+      "type": "object",
+      "required": ["classification", "explanation"],
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["full", "bounded", "partial", "centralized", "fake"]
+        },
+        "proof_ref": {"type": "string"},
+        "explanation": {"type": "string", "minLength": 10},
+        "dependencies_disclosed": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "If not 'full', enumerate the off-chain dependencies that prevent full walkaway"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "tool", "obligation_mapped_to", "depth_contribution", "justification"],
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": {"type": "string", "pattern": "^evidence-[0-9a-zA-Z_-]+$"},
+          "tool": {"type": "string"},
+          "tool_version": {"type": "string"},
+          "finding_id": {"type": "string"},
+          "obligation_mapped_to": {
+            "type": "string",
+            "enum": ["A1", "A2", "A3", "A4", "A5"]
+          },
+          "depth_contribution": {"$ref": "#/$defs/depth"},
+          "raw_finding": {"type": "object"},
+          "property_checked": {"type": "string"},
+          "result": {"type": "string", "enum": ["passed", "failed", "indeterminate"]},
+          "justification": {"type": "string", "minLength": 10}
+        }
+      }
+    },
+    "issuer": {
+      "type": "object",
+      "required": ["name", "public_key"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "identifier": {"type": "string", "format": "uri"},
+        "public_key": {
+          "type": "string",
+          "pattern": "^ed25519:[0-9a-f]{64}$"
+        },
+        "registry_address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        }
+      }
+    },
+    "issuance": {
+      "type": "object",
+      "required": ["timestamp", "issuance_method"],
+      "additionalProperties": false,
+      "properties": {
+        "timestamp": {"type": "string", "format": "date-time"},
+        "issuance_method": {
+          "type": "string",
+          "enum": ["automated_pipeline", "automated_with_review", "human_audit", "hybrid"]
+        },
+        "human_review": {"type": "boolean"},
+        "notes": {"type": "string"}
+      }
+    },
+    "validity": {
+      "type": "object",
+      "required": ["valid_from", "valid_until", "revalidation_triggers"],
+      "additionalProperties": false,
+      "properties": {
+        "valid_from": {"type": "string", "format": "date-time"},
+        "valid_until": {"type": "string", "format": "date-time"},
+        "revalidation_triggers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "contract_upgrade",
+              "compiler_change",
+              "dependency_update",
+              "external_assumption_change",
+              "oracle_change",
+              "governance_action",
+              "manual"
+            ]
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "supersession": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["superseded_by", "superseded_at", "reason"],
+          "additionalProperties": false,
+          "properties": {
+            "superseded_by": {"type": "string"},
+            "superseded_at": {"type": "string", "format": "date-time"},
+            "reason": {"type": "string"}
+          }
+        }
+      ]
+    },
+    "revocation": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["revoked_at", "revoked_by", "reason"],
+          "additionalProperties": false,
+          "properties": {
+            "revoked_at": {"type": "string", "format": "date-time"},
+            "revoked_by": {"type": "string"},
+            "reason": {"type": "string"}
+          }
+        }
+      ]
+    },
+    "challenges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["challenge_id", "challenge_type", "submitted_at"],
+        "additionalProperties": false,
+        "properties": {
+          "challenge_id": {"type": "string"},
+          "challenger_pubkey": {"type": "string"},
+          "challenge_type": {
+            "type": "string",
+            "enum": [
+              "basis_counterexample",
+              "wrong_mapping",
+              "invalid_certificate",
+              "stale_proof",
+              "unsound_monitor",
+              "wrong_walkaway_classification"
+            ]
+          },
+          "submitted_at": {"type": "string", "format": "date-time"},
+          "evidence_ref": {"type": "string"},
+          "resolution": {
+            "type": "object",
+            "properties": {
+              "resolved_at": {"type": "string", "format": "date-time"},
+              "outcome": {
+                "type": "string",
+                "enum": ["upheld", "rejected", "partial"]
+              },
+              "consequence": {
+                "type": "string",
+                "enum": ["no_action", "supersession_issued", "revocation_issued", "mapping_updated"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 over canonical serialization (excluding fingerprint and signature fields)"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{128}$",
+      "description": "Ed25519 signature over fingerprint, 64 bytes hex-encoded"
+    }
+  },
+  "$defs": {
+    "depth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Evidence depth D0-D5: 0=none, 1=declared, 2=static, 3=symbolic, 4=formal proof, 5=runtime enforced"
+    },
+    "obligation_entry": {
+      "type": "object",
+      "required": ["depth", "evidence_refs"],
+      "additionalProperties": false,
+      "properties": {
+        "depth": {"$ref": "#/$defs/depth"},
+        "evidence_refs": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "enforcement_mode": {
+          "type": "string",
+          "enum": ["passive", "monitored", "gated"],
+          "description": "passive=certificate only; monitored=runtime observability; gated=runtime enforcement (D5)"
+        }
+      }
+    }
+  }
+}

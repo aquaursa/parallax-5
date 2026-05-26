@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Live deployments of ParallaxRegistry across EVM chains. Updated on each new deployment. All entries verified on the chain's canonical block explorer.",
+  "deployments": {
+    "11155111": {
+      "chain": "Sepolia",
+      "chain_id": 11155111,
+      "address": "0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b",
+      "deploy_tx": "0x7919e066e89f9d236d52d5bd3918cc51e5497b45bba261af2c517aa8bd175893",
+      "first_issue_tx": "0x2c55a4d1b1ceaf1545734c8f8d79a7f96f2a7c89fa9dc867b361b9b3fd249962",
+      "first_issue_fingerprint": "0xa880650b924463c61c78c014f4966e554fa59913941e872e036255259a8da86d",
+      "first_issue_block": 10927840,
+      "compiler": "0.8.24+commit.e11b9ed9",
+      "etherscan": "https://sepolia.etherscan.io/address/0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b#code",
+      "verified": true,
+      "deployer": "0x617a445F0a898064c530B43b373d39872C0C4c56",
+      "deploy_date": "2026-05-26"
+    }
+  }
+}

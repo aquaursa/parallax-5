@@ -1,0 +1,137 @@
+{
+  "schema_version": "parallax5-certificate-v1.0",
+  "certificate_id": "01a4fbb5-9615-4dfd-aabf-cbbcc1eb4d74",
+  "protocol": {
+    "name": "PARALLAX-5 Demo 2 \u2014 PatchedBridge",
+    "version": "1.0.0",
+    "identifier": "parallax5_coordinator/demos/bridge",
+    "category": "bridge"
+  },
+  "artifact": {
+    "source_hash": "sha256:b7e5dcb2e9821aec8c9cb5dffd66bcc55a99a315a3c48499522aef18a6b22fc6"
+  },
+  "deployment": [],
+  "mapping": {
+    "namespace": "tool-mapping/aquaursa-v1",
+    "version": "1.0.0",
+    "doi": "10.5281/zenodo.20386868"
+  },
+  "trust_base": {
+    "ecdsa_euf_cma": true,
+    "evm_yul_lean_refinement": true,
+    "assumptions": [
+      "secp256k1 ECDSA is EUF-CMA secure under canonical (low-s) signing",
+      "Block timestamps cannot drift more than 15 seconds (per Ethereum consensus)",
+      "Validator set rotation increments the validatorEpoch monotonically",
+      "FRESHNESS_WINDOW = 3600 seconds is consensus-appropriate; longer windows would weaken A5"
+    ]
+  },
+  "obligation_coverage": {
+    "A1": {
+      "depth": 0,
+      "evidence_refs": []
+    },
+    "A2": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-ext-004"
+      ]
+    },
+    "A3": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-ext-002"
+      ]
+    },
+    "A4": {
+      "depth": 2,
+      "evidence_refs": [
+        "evidence-002"
+      ]
+    },
+    "A5": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-ext-003"
+      ]
+    }
+  },
+  "crops_vector": {
+    "C": 4,
+    "R": 4,
+    "O": 5,
+    "P": 0,
+    "S": 4,
+    "computation_method": "max_within_dimension"
+  },
+  "walkaway": {
+    "classification": "bounded",
+    "proof_ref": "demos/bridge/proof/Attestation.lean",
+    "explanation": "PatchedBridge has no upgrade path or admin function; validator set is established at construction. Validator rotation requires a NEW deployment with new epoch, not an in-place admin operation. The bridge does not have a 'pause' or 'drain' admin function. Classified bounded because the bridge depends on the validator set's continued existence (off-chain attestation infrastructure), but on-chain there is no irreplaceable role.",
+    "dependencies_disclosed": [
+      "Off-chain validator infrastructure must continue to attest withdrawals; if all validators disappear, deposits cannot be withdrawn (liveness concern, not safety)"
+    ]
+  },
+  "evidence": [
+    {
+      "evidence_id": "evidence-002",
+      "tool": "slither",
+      "tool_version": "see tool docs",
+      "finding_id": "reentrancy-events",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 2,
+      "justification": "Event emission after external call; reorderable. Weaker temporal-distinctness violation but flagged for completeness."
+    },
+    {
+      "evidence_id": "evidence-ext-002",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "signature_integrity_theorem",
+      "obligation_mapped_to": "A3",
+      "depth_contribution": 4,
+      "justification": "Lean 4 proof in demos/bridge/proof/Attestation.lean establishes A3 (signature integrity) for PatchedBridge. Theorem patched_rejects_high_s shows that high-s signatures are rejected by the verifier, foreclosing the signature-malleability replay family. Zero sorry."
+    },
+    {
+      "evidence_id": "evidence-ext-003",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "freshness_attestation_theorem",
+      "obligation_mapped_to": "A5",
+      "depth_contribution": 4,
+      "justification": "Lean 4 proofs in demos/bridge/proof/Attestation.lean (stale_attestation_rejected, future_attestation_rejected, epoch_rotation_breaks_replay) establish A5 (external attestation freshness). The bridge rejects stale and future attestations, and epoch rotation breaks replay across validator-set changes."
+    },
+    {
+      "evidence_id": "evidence-ext-004",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "walkaway_bounded_theorem",
+      "obligation_mapped_to": "A2",
+      "depth_contribution": 4,
+      "justification": "PatchedBridge has no admin role; the walkaway property holds at bounded level per the bounded-walkaway lemma in lean/Parallax5/Walkaway.lean. Bounded rather than full because the bridge depends on off-chain validator infrastructure for liveness."
+    }
+  ],
+  "issuer": {
+    "name": "AquaUrsa Research (PARALLAX-5 Demo 2)",
+    "public_key": "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c"
+  },
+  "issuance": {
+    "timestamp": "2026-05-26T17:08:13.191777+00:00",
+    "issuance_method": "automated_pipeline",
+    "human_review": false,
+    "notes": "Issued by parallax5 certify subcommand"
+  },
+  "validity": {
+    "valid_from": "2026-05-26T17:08:13.191777+00:00",
+    "valid_until": "2026-11-22T17:08:13.191777+00:00",
+    "revalidation_triggers": [
+      "contract_upgrade",
+      "compiler_change",
+      "manual"
+    ]
+  },
+  "supersession": null,
+  "revocation": null,
+  "challenges": [],
+  "fingerprint": "8b8c1b081efa2abf7050ef36f44cac71f4c4b84270fa7f87617847214e62ab9b",
+  "signature": "3067e5a42996426b8723d0714a9b0737ee13e518dbfb74fa3935f898490d99257c019b68517a207a02550177d9e43dae2338668b091be55190ba7cd775b5334a"
+}

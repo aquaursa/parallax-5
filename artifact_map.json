@@ -1,0 +1,159 @@
+{
+  "artifact_map_version": "1.0",
+  "substrate_version": "1.0.0",
+  "paper_version": "1.0.0",
+  "groups": {
+    "formal_core": {
+      "description": "Substrate v8 formal core: Lean module, Z3 models, catalog, fire tests, halmos contracts",
+      "claims": {
+        "lean_theorems": 95,
+        "lean_sorrys": 0,
+        "python_fire_tests": 134,
+        "catalog_incidents": 53,
+        "halmos_archetypes": 4
+      },
+      "paths": {
+        "lean_module": "parallax/formal/lean/Parallax5.lean",
+        "evmyul_instance": "parallax/formal/lean/Parallax5_EvmYulLean.lean",
+        "fire_tests": "parallax/formal/fire_tests.py",
+        "exploit_catalog": "parallax/formal/exploit_catalog.py",
+        "halmos_contracts": "parallax/formal/halmos/contracts/*.sol",
+        "verify_script": "parallax/formal/lean/verify.sh"
+      }
+    },
+    "substrate_foundations": {
+      "description": "Substrate foundations: Charter, Fork Protocol, Schema, Walkaway, CROPS",
+      "claims": {
+        "charter_articles": 11,
+        "fork_types": 4,
+        "compatibility_levels": 4,
+        "schema_fields": 19,
+        "lifecycle_states": 7,
+        "walkaway_theorems": 6,
+        "crops_tests": 19,
+        "crops_matrix_version": "1.0.1"
+      }
+    },
+    "worked_examples": {
+      "description": "Three flagship worked examples",
+      "demos": {
+        "vault": {
+          "obligations": [
+            "A1"
+          ],
+          "depth": 4,
+          "walkaway": "full",
+          "crops": {
+            "C": 4,
+            "R": 5,
+            "O": 5,
+            "P": 0,
+            "S": 4
+          },
+          "proof_lines": 196,
+          "proof_theorems": 5
+        },
+        "bridge": {
+          "obligations": [
+            "A3",
+            "A5"
+          ],
+          "depth": 4,
+          "walkaway": "bounded",
+          "crops": {
+            "C": 4,
+            "R": 4,
+            "O": 5,
+            "P": 0,
+            "S": 4
+          },
+          "proof_lines": 193,
+          "proof_theorems": 6
+        },
+        "agent_gate": {
+          "obligations": [
+            "A1",
+            "A2"
+          ],
+          "depth": 5,
+          "walkaway": "bounded",
+          "crops": {
+            "C": 5,
+            "R": 5,
+            "O": 5,
+            "P": 0,
+            "S": 5
+          },
+          "proof_lines": 261,
+          "proof_theorems": 4
+        }
+      }
+    },
+    "coordinator": {
+      "description": "CLI and tooling",
+      "claims": {
+        "cli_subcommands": 6,
+        "compositional_checks": 2152
+      }
+    },
+    "onchain_registry": {
+      "description": "Onchain Certificate Registry \u2014 deployable EVM contract anchoring certificate lifecycle events",
+      "claims": {
+        "contract_loc": 200,
+        "solidity_version": "0.8.24",
+        "license": "Apache-2.0",
+        "foundry_tests": 24,
+        "foundry_fuzz_runs_per_test": 256,
+        "lean_theorems": 6,
+        "lean_sorrys": 0,
+        "lifecycle_states": 7,
+        "event_kinds": 6
+      },
+      "paths": {
+        "contract": "registry/src/ParallaxRegistry.sol",
+        "tests": "registry/test/ParallaxRegistry.t.sol",
+        "lean_proof": "lean/Parallax5/Registry.lean",
+        "deploy_script": "registry/script/Deploy.s.sol",
+        "deploy_wrapper": "registry/scripts/deploy.sh",
+        "deployment_manifest": "registry/deployments.json",
+        "python_client": "src/parallax5_coordinator/registry_client.py",
+        "documentation": "docs/REGISTRY.md"
+      },
+      "gas_profile_anvil": {
+        "issue": 115447,
+        "publish": 31520,
+        "supersede": 38000,
+        "revoke": 38000,
+        "expire": 32000,
+        "withdraw": 32000
+      },
+      "self_certificate": {
+        "obligation_coverage": {
+          "A1": "D4",
+          "A2": "D4"
+        },
+        "walkaway": "full",
+        "crops": {
+          "C": 4,
+          "R": 5,
+          "O": 5,
+          "P": 0,
+          "S": 4
+        }
+      }
+    }
+  },
+  "verification_commands": {
+    "compositional_theorems": "PYTHONPATH=src python3 -m parallax5_coordinator.theorems",
+    "crops_tests": "PYTHONPATH=src python3 tests/test_crops.py",
+    "demos_end_to_end": "make demo-all",
+    "full_verification": "./RUN_VERIFICATION.sh",
+    "registry_tests": "cd registry && forge test",
+    "registry_deploy_local": "cd registry && ./scripts/deploy.sh anvil"
+  },
+  "doi": {
+    "parent_artifact_doi": "10.5281/zenodo.20386868",
+    "parent_artifact_meaning": "EVMYulLean integration verification ( PARALLAX-CROPS)",
+    "paper_doi": "TBD on Zenodo publication"
+  }
+}

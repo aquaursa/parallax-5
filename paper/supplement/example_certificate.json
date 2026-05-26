@@ -1,0 +1,118 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-0x4c4f4f5050494e47-2026-05-25",
+  "protocol_id": "Looping Vault V2",
+  "compliance_level": "P4",
+  "artifacts": {
+    "source_repo": "github.com/looping-finance/vault-v2",
+    "commit_hash": "9a3f7c8d2e1b4a5f6d8e9c0a1b2c3d4e5f6a7b8c",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0x5e1b9a3f7c8d2e1b4a5f6d8e9c0a1b2c3d4f6a8b"
+      },
+      {
+        "chain_id": 8453,
+        "address": "0xa1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8d9ef"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0x9b4f2c8d3e1a5b6f7c8d9e0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c",
+      "base": "0x9b4f2c8d3e1a5b6f7c8d9e0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c"
+    }
+  },
+  "obligation_map": {
+    "deposit(uint256,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "redeem(uint256,address,address)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "setFeeRecipient(address)": [
+      "A2"
+    ],
+    "harvest()": [
+      "A1",
+      "A4",
+      "A5"
+    ]
+  },
+  "proof_artifacts": {
+    "A1": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 47,
+      "artifact_hash": "sha256:7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b"
+    },
+    "A2": {
+      "tool": "Certora",
+      "version": "7.10.0",
+      "verdict": "PASS",
+      "rule_id": "auth_admin_only",
+      "artifact_hash": "sha256:1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e"
+    },
+    "A4": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 23,
+      "artifact_hash": "sha256:5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f"
+    },
+    "A5": {
+      "tool": "Lean4",
+      "version": "4.10.0",
+      "verdict": "PASS",
+      "theorem_names": [
+        "oracle_freshness_holds",
+        "quorum_satisfied"
+      ],
+      "artifact_hash": "sha256:9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d"
+    }
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "multisig 4-of-7",
+        "hardware-secured signers",
+        "key rotation 6mo"
+      ],
+      "auditor": "Halborn Hardware Audit 2026-04"
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "signer training program",
+        "jurisdictional separation",
+        "intent-aware signing UI"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "3-of-5 oracle quorum",
+        "independent RPC paths",
+        "DNS DNSSEC"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "delegatecall to external library X requires separate certificate",
+    "front-running protection out of scope of this certificate"
+  ],
+  "revalidation_triggers": [
+    "any commit to repo",
+    "oracle provider change",
+    "multisig signer change",
+    "365 days elapsed"
+  ],
+  "issued_at": "2026-05-25T14:00:00Z",
+  "expires_at": "2027-05-25T14:00:00Z",
+  "issuer": {
+    "name": "AquaUrsa Verification Lab",
+    "did": "did:web:verify.aquaursa.io",
+    "signature": "0x8e9f0a1b2c3d4e5f00112233445566778899aabbccddeeff8e9f0a1b2c3d4e5f00112233445566778899aabbccddeeff8e9f0a1b2c3d4e5f0011"
+  }
+}

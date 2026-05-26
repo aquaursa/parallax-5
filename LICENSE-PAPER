@@ -1,0 +1,13 @@
+Paper text in this repository (paper/parallax-5.tex, paper/parallax-5.pdf, and
+related supplements explicitly noted as paper content) is licensed under the
+Creative Commons Attribution 4.0 International License (CC-BY 4.0).
+
+To view a copy of this license, visit:
+https://creativecommons.org/licenses/by/4.0/
+
+Standard-text content (the PARALLAX-5 specification, including the obligation
+vocabulary, depth scale, CROPS dimensions, walkaway taxonomy, and certificate
+field semantics) is dedicated under CC0 1.0 Universal — see LICENSE-CC0.
+
+Code (Python, Solidity, Lean, scripts) is licensed under Apache-2.0 —
+see LICENSE.

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "parallax5-coordinator"
+version = "1.0.0"
+description = "Compositional smart-contract verification via PARALLAX-5 obligation mapping"
+readme = "README.md"
+authors = [
+    {name = "AquaUrsa Research", email = "research@aquaursa.io"}
+]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+requires-python = ">=3.10"
+keywords = ["solidity", "smart-contract", "security", "verification", "PARALLAX-5", "formal-methods"]
+
+[project.urls]
+"Homepage" = "https://github.com/aquaursa/parallax-5"
+"Source" = "https://github.com/aquaursa/parallax-5"
+"Paper" = "https://github.com/aquaursa/parallax-5/blob/main/paper/parallax-5.pdf"
+"Verification Artifact" = "https://doi.org/10.5281/zenodo.20386868"
+"Bug Reports" = "https://github.com/aquaursa/parallax-5/issues"
+
+[project.optional-dependencies]
+server = ["fastapi>=0.100", "uvicorn>=0.20", "pydantic>=2.0"]
+slither = ["slither-analyzer>=0.10", "solc-select>=1.0"]
+mythril = ["mythril>=0.24"]
+web3 = ["web3>=6.0", "eth-account>=0.10"]
+all = ["fastapi>=0.100", "uvicorn>=0.20", "pydantic>=2.0", "slither-analyzer>=0.10", "solc-select>=1.0", "web3>=6.0", "eth-account>=0.10"]
+
+[project.scripts]
+parallax5 = "parallax5_coordinator.unified_cli:main"
+parallax5-coordinator = "parallax5_coordinator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["parallax5_coordinator*", "parallax5_cli*"]
+
+[tool.setuptools.package-data]
+parallax5_coordinator = ["../schemas/*.json", "../corpus/*.json"]

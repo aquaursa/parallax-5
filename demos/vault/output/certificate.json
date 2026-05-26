@@ -1,0 +1,153 @@
+{
+  "schema_version": "parallax5-certificate-v1.0",
+  "certificate_id": "4dc17a10-5e9e-4a99-9518-00d3f296eb76",
+  "protocol": {
+    "name": "PARALLAX-5 Demo 1 \u2014 PatchedVault",
+    "version": "1.0.0",
+    "identifier": "parallax5_coordinator/demos/vault",
+    "category": "vault"
+  },
+  "artifact": {
+    "source_hash": "sha256:7a304cbebea43d2ce2379deef69612388589ec0000a8e88440373ef4787de129"
+  },
+  "deployment": [],
+  "mapping": {
+    "namespace": "tool-mapping/aquaursa-v1",
+    "version": "1.0.0",
+    "doi": "10.5281/zenodo.20386868"
+  },
+  "trust_base": {
+    "ecdsa_euf_cma": false,
+    "evm_yul_lean_refinement": true,
+    "assumptions": [
+      "Underlying ERC-20 token conforms to standard transfer semantics (no fee-on-transfer, no rebasing)",
+      "Solidity 0.8.20 integer overflow checks are sound (default for ^0.8.20)",
+      "DECIMALS_OFFSET = 6 is enforced by contract; constructor cannot lower it"
+    ]
+  },
+  "obligation_coverage": {
+    "A1": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-ext-005"
+      ]
+    },
+    "A2": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-ext-006"
+      ]
+    },
+    "A3": {
+      "depth": 0,
+      "evidence_refs": []
+    },
+    "A4": {
+      "depth": 2,
+      "evidence_refs": [
+        "evidence-001",
+        "evidence-002",
+        "evidence-003",
+        "evidence-004"
+      ]
+    },
+    "A5": {
+      "depth": 0,
+      "evidence_refs": []
+    }
+  },
+  "crops_vector": {
+    "C": 4,
+    "R": 5,
+    "O": 5,
+    "P": 0,
+    "S": 4,
+    "computation_method": "max_within_dimension"
+  },
+  "walkaway": {
+    "classification": "full",
+    "proof_ref": "demos/vault/proof/Conservation.lean",
+    "explanation": "PatchedVault has no admin role, no proxy pattern, no upgrade path, no pause function. asset is immutable; all state-changing functions are open. The walkaway property is structural: no privileged role exists.",
+    "dependencies_disclosed": []
+  },
+  "evidence": [
+    {
+      "evidence_id": "evidence-001",
+      "tool": "slither",
+      "tool_version": "see tool docs",
+      "finding_id": "reentrancy-no-eth",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 2,
+      "justification": "Reentrancy without ether (e.g., ERC-20 callbacks). Same temporal-distinctness violation."
+    },
+    {
+      "evidence_id": "evidence-002",
+      "tool": "slither",
+      "tool_version": "see tool docs",
+      "finding_id": "reentrancy-benign",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 1,
+      "justification": "Local state change after external call but no apparent state inconsistency. Mention-grade evidence."
+    },
+    {
+      "evidence_id": "evidence-003",
+      "tool": "slither",
+      "tool_version": "see tool docs",
+      "finding_id": "reentrancy-events",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 2,
+      "justification": "Event emission after external call; reorderable. Weaker temporal-distinctness violation but flagged for completeness."
+    },
+    {
+      "evidence_id": "evidence-004",
+      "tool": "slither",
+      "tool_version": "see tool docs",
+      "finding_id": "reentrancy-events",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 2,
+      "justification": "Event emission after external call; reorderable. Weaker temporal-distinctness violation but flagged for completeness."
+    },
+    {
+      "evidence_id": "evidence-ext-005",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "vault_conservation_theorem",
+      "obligation_mapped_to": "A1",
+      "depth_contribution": 4,
+      "justification": "Lean 4 proof in demos/vault/proof/Conservation.lean establishes A1 conservation for PatchedVault. Theorems: deposit_preserves_conservation, donation_preserves_conservation, inflation_attack_cost_lower_bound. Zero sorry."
+    },
+    {
+      "evidence_id": "evidence-ext-006",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "walkaway_full_theorem",
+      "obligation_mapped_to": "A2",
+      "depth_contribution": 4,
+      "justification": "PatchedVault has no admin role; the walkaway property holds trivially per walkaway_trivial_for_empty_admins in lean/Parallax5/Walkaway.lean."
+    }
+  ],
+  "issuer": {
+    "name": "AquaUrsa Research (PARALLAX-5 Demo 1)",
+    "public_key": "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c"
+  },
+  "issuance": {
+    "timestamp": "2026-05-26T17:08:10.258700+00:00",
+    "issuance_method": "automated_pipeline",
+    "human_review": false,
+    "notes": "Issued by parallax5 certify subcommand"
+  },
+  "validity": {
+    "valid_from": "2026-05-26T17:08:10.258700+00:00",
+    "valid_until": "2026-11-22T17:08:10.258700+00:00",
+    "revalidation_triggers": [
+      "contract_upgrade",
+      "compiler_change",
+      "manual"
+    ]
+  },
+  "supersession": null,
+  "revocation": null,
+  "challenges": [],
+  "fingerprint": "069cbe44d97e20df54e286307f78cb2ff05006e139ec4c797ea31343de5aaefe",
+  "signature": "556d54e87a5633d2d74f298dac0028109e895d3023ced34801994991de070a191056de4265f9797f06fccfd6a2e6651ea65ed40d033ad3615392c0c12e76a80b"
+}

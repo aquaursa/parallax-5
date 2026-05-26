@@ -1,0 +1,5 @@
+name = "parallax5-compositional"
+defaultTargets = ["Parallax5"]
+
+[[lean_lib]]
+name = "Parallax5"

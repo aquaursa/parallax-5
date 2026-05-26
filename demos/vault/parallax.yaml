@@ -1,0 +1,50 @@
+protocol:
+  name: PARALLAX-5 Demo 1 — PatchedVault
+  version: 1.0.0
+  identifier: parallax5_coordinator/demos/vault
+  category: vault
+
+contract_source: contracts/PatchedVault.sol
+tools: [slither]
+
+trust_base:
+  ecdsa_euf_cma: false
+  evm_yul_lean_refinement: true
+  assumptions:
+    - "Underlying ERC-20 token conforms to standard transfer semantics (no fee-on-transfer, no rebasing)"
+    - "Solidity 0.8.20 integer overflow checks are sound (default for ^0.8.20)"
+    - "DECIMALS_OFFSET = 6 is enforced by contract; constructor cannot lower it"
+
+walkaway:
+  classification: full
+  proof_ref: "demos/vault/proof/Conservation.lean"
+  explanation: "PatchedVault has no admin role, no proxy pattern, no upgrade path, no pause function. asset is immutable; all state-changing functions are open. The walkaway property is structural: no privileged role exists."
+  dependencies_disclosed: []
+
+issuer:
+  name: "AquaUrsa Research (PARALLAX-5 Demo 1)"
+  public_key: "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c"
+
+mapping:
+  namespace: "tool-mapping/aquaursa-v1"
+  version: "1.0.0"
+  doi: "10.5281/zenodo.20386868"
+
+# External evidence beyond what the coordinator runners detect
+external_evidence:
+  - obligation: A1
+    depth: 4
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: vault_conservation_theorem
+    justification: "Lean 4 proof in demos/vault/proof/Conservation.lean establishes A1 conservation for PatchedVault. Theorems: deposit_preserves_conservation, donation_preserves_conservation, inflation_attack_cost_lower_bound. Zero sorry."
+  - obligation: A2
+    depth: 4
+    tool: lean4_kernel
+    tool_version: "4.22.0"
+    finding_id: walkaway_full_theorem
+    justification: "PatchedVault has no admin role; the walkaway property holds trivially per walkaway_trivial_for_empty_admins in lean/Parallax5/Walkaway.lean."
+
+# Source is open: contracts/ and proof/ are public Apache-2.0
+source_openness_depth: 5
+privacy_primitives_depth: 0

@@ -1,0 +1,78 @@
+                            CC0 1.0 Universal
+
+CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL
+SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT
+RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN "AS-IS" BASIS.
+
+Statement of Purpose
+
+The person associating CC0 with a Work voluntarily elects to apply CC0 to the
+Work and publicly distribute the Work under its terms, with knowledge of his
+or her Copyright and Related Rights in the Work and the meaning and intended
+legal effect of CC0 on those rights.
+
+1. Copyright and Related Rights.
+
+A Work made available under CC0 may be protected by copyright and related or
+neighboring rights ("Copyright and Related Rights").
+
+2. Waiver.
+
+To the greatest extent permitted by, but not in contravention of, applicable
+law, Affirmer hereby overtly, fully, permanently, irrevocably and
+unconditionally waives, abandons, and surrenders all of Affirmer's Copyright
+and Related Rights and associated claims and causes of action, whether now
+known or unknown (including existing as well as future claims and causes of
+action), in the Work.
+
+3. Public License Fallback.
+
+Should any part of the Waiver for any reason be judged legally invalid or
+ineffective under applicable law, then the Waiver shall be preserved to the
+maximum extent permitted taking into account Affirmer's express Statement of
+Purpose.
+
+4. Limitations and Disclaimers.
+
+ a. No trademark or patent rights held by Affirmer are waived, abandoned,
+    surrendered, licensed or otherwise affected by this document.
+ b. Affirmer offers the Work as-is and makes no representations or warranties
+    of any kind concerning the Work, express, implied, statutory or otherwise.
+ c. Affirmer disclaims responsibility for clearing rights of other persons
+    that may apply to the Work or any use thereof.
+ d. Affirmer understands and acknowledges that Creative Commons is not a
+    party to this document and has no duty or obligation with respect to this
+    CC0 or use of the Work.
+
+For the full canonical text of CC0 1.0 Universal, see:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+================================================================================
+
+PARALLAX-5 SPECIFIC APPLICATION:
+
+The PARALLAX-5 standard text — including but not limited to:
+- VISION_AND_ROADMAP_v*.md
+- docs/CHARTER.md
+- docs/FORK_PROTOCOL.md
+- TOOL_MAPPING_v*.md
+- PARALLAX5_CERTIFICATE_SCHEMA_v*.md
+- STRATEGIC_CONTEXT_*.md
+- CHANGELOG_*.md
+- NEW_CHAT_ONBOARDING.md
+- The text content of the PARALLAX-5 paper (independently of the LaTeX
+  build infrastructure)
+
+— is released under CC0 1.0 Universal.
+
+The PARALLAX-5 code artifacts (the parallax5_coordinator Python package,
+the JSON Schema files, the Lean 4 theorem files, the smart contracts,
+the GitHub Action infrastructure, and associated tooling) remain under
+the Apache License 2.0; see LICENSE for those terms.
+
+The distinction follows the Non-Capturability Charter Article 2:
+standard text under CC0 ensures the vocabulary is unencumbered; code
+under Apache-2.0 preserves attribution while permitting commercial use.
+
+Affirmer: AquaUrsa Research
+Date of affirmation: 2026-05-26

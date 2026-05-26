@@ -1,0 +1,174 @@
+{
+  "schema_version": "parallax5-certificate-v1.0",
+  "certificate_id": "c1234567-89ab-4def-8123-456789abcdef",
+  "protocol": {
+    "name": "Uniswap V3 Core",
+    "version": "1.0.0",
+    "identifier": "https://github.com/Uniswap/v3-core",
+    "category": "amm"
+  },
+  "artifact": {
+    "source_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytecode_hash": "sha256:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "compiler": "solc-0.7.6",
+    "compiler_settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 800
+      }
+    }
+  },
+  "deployment": [
+    {
+      "chain_id": 1,
+      "chain_name": "ethereum-mainnet",
+      "address": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "deployed_at_block": 12369621,
+      "deployer": "0x6c9fc64a53c1b71fb3f9af64d1ae3a4931a5f4e9"
+    }
+  ],
+  "mapping": {
+    "namespace": "tool-mapping/aquaursa-v1",
+    "version": "1.0.0",
+    "doi": "10.5281/zenodo.20386868",
+    "hash": "sha256:9b7bb24d91c58e987a0fb7c9d3a0887ca4d3d80a1477faf275e4d67cf23080a8"
+  },
+  "trust_base": {
+    "ecdsa_euf_cma": true,
+    "evm_yul_lean_refinement": true,
+    "oracle_freshness_window_seconds": 0,
+    "external_attestation_quorum": "n/a",
+    "assumptions": [
+      "Uniswap V3 Core contracts are deployed without admin keys or upgrade paths",
+      "ERC-20 token transfer semantics conform to the standard for paired assets",
+      "No external oracle is used by core swap logic"
+    ]
+  },
+  "obligation_coverage": {
+    "A1": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-001",
+        "evidence-002"
+      ]
+    },
+    "A2": {
+      "depth": 5,
+      "evidence_refs": [
+        "evidence-003"
+      ],
+      "enforcement_mode": "gated"
+    },
+    "A3": {
+      "depth": 0,
+      "evidence_refs": []
+    },
+    "A4": {
+      "depth": 4,
+      "evidence_refs": [
+        "evidence-004"
+      ]
+    },
+    "A5": {
+      "depth": 0,
+      "evidence_refs": []
+    }
+  },
+  "crops_vector": {
+    "C": 4,
+    "R": 5,
+    "O": 5,
+    "P": 0,
+    "S": 5,
+    "computation_method": "max_within_dimension"
+  },
+  "walkaway": {
+    "classification": "full",
+    "proof_ref": "evidence-005",
+    "explanation": "Uniswap V3 Core is deployed with no admin keys, no proxy patterns, no governance hooks, and no upgrade paths. The walkaway property is structural: there exists no privileged role that could be removed because no privileged role exists. Formal Lean 4 proof establishes that every external entry point preserves the invariants under arbitrary caller identities, with no special case for admin callers.",
+    "dependencies_disclosed": []
+  },
+  "evidence": [
+    {
+      "evidence_id": "evidence-001",
+      "tool": "halmos",
+      "tool_version": "0.2.x",
+      "finding_id": "invariant-violated",
+      "obligation_mapped_to": "A1",
+      "depth_contribution": 4,
+      "property_checked": "K-invariant: x * y >= K under swap, mint, burn operations",
+      "result": "passed",
+      "justification": "Halmos symbolic execution verified the constant-product invariant holds across all swap, mint, and burn operations within the symbolic-execution bound. The K-invariant is the formal expression of A1 conservation for AMM-style pools."
+    },
+    {
+      "evidence_id": "evidence-002",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "amm_conservation_theorem",
+      "obligation_mapped_to": "A1",
+      "depth_contribution": 4,
+      "property_checked": "Pool reserves never decrease through unauthorized operations",
+      "result": "passed",
+      "justification": "Kernel-accepted theorem in Lean 4 establishes A1 over the V3 swap logic, parameterized by the fee tier. The theorem composes with the EVMYulLean refinement deposit (doi:10.5281/zenodo.20386868) to lift to the production EVM semantics."
+    },
+    {
+      "evidence_id": "evidence-003",
+      "tool": "parallax5_runtime_gate",
+      "tool_version": "1.0.0",
+      "finding_id": "admin_authorization_enforced",
+      "obligation_mapped_to": "A2",
+      "depth_contribution": 5,
+      "property_checked": "No external function permits state changes to fee-collection parameters except the factory-deployed pool itself",
+      "result": "passed",
+      "justification": "Runtime gate (StepSecure) actively monitors all calls to setFeeProtocol. The gate rejects any call where msg.sender is not the recorded factory address. D5 enforcement is the strongest form of A2 satisfaction: even if a future flaw is found, the gate prevents the bad transition."
+    },
+    {
+      "evidence_id": "evidence-004",
+      "tool": "slither",
+      "tool_version": "0.10.4",
+      "finding_id": "reentrancy_absent",
+      "obligation_mapped_to": "A4",
+      "depth_contribution": 2,
+      "result": "passed",
+      "justification": "Slither's reentrancy detector family (reentrancy-eth, reentrancy-no-eth, reentrancy-events) produced no findings on V3 Core. Combined with Lean 4 reentrancy-freedom proof (separate evidence), A4 is established at depth 4 jointly; this entry contributes the static-detector depth-2 component."
+    },
+    {
+      "evidence_id": "evidence-005",
+      "tool": "lean4_kernel",
+      "tool_version": "4.22.0",
+      "finding_id": "walkaway_full_theorem",
+      "obligation_mapped_to": "A2",
+      "depth_contribution": 4,
+      "property_checked": "Full walkaway: no admin role exists; removing any caller from the system does not affect the contract's protected behavior",
+      "result": "passed",
+      "justification": "Lean 4 proof establishes that the V3 Core contract has no privileged caller class. The walkaway test is satisfied trivially (admin set is empty). This is the canonical example of full walkaway."
+    }
+  ],
+  "issuer": {
+    "name": "AquaUrsa Research (worked example issuer)",
+    "identifier": "https://parallax.xyz",
+    "public_key": "ed25519:6698bfea91e1827955191845c5a8c61b50f9b6cb209805374fb24d7a0d64dd3c",
+    "registry_address": "0x0000000000000000000000000000000000000000"
+  },
+  "issuance": {
+    "timestamp": "2026-05-26T10:30:00+00:00",
+    "issuance_method": "automated_with_review",
+    "human_review": true,
+    "notes": "Worked example for docs/CERTIFICATE_SCHEMA.md Section 9. Not a production-issued certificate for Uniswap V3 Core; pedagogical illustration only."
+  },
+  "validity": {
+    "valid_from": "2026-05-26T10:30:00+00:00",
+    "valid_until": "2026-11-22T10:30:00+00:00",
+    "revalidation_triggers": [
+      "contract_upgrade",
+      "compiler_change",
+      "dependency_update",
+      "manual"
+    ]
+  },
+  "supersession": null,
+  "revocation": null,
+  "challenges": [],
+  "fingerprint": "9a893d32c6dd952ba9425847fe5da7772e3175d8b78d2e2e2af9ffd3e51a6e85",
+  "signature": "55586da85a008cc5463cc72436d992e274c5a25610a35ed4831d4682206cff567de3c5775e01363af838bfec7d57942f0dfd010da1ac49cddbaa829d355c5b5f"
+}

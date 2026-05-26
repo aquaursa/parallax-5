@@ -1,0 +1,110 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-compound-v3-2026-05-25",
+  "protocol_id": "Compound III (Comet)",
+  "compliance_level": "P3",
+  "_classification_note": "Speculative classification. Compound III has Certora-verified invariants. Liquidation paths involve Chainlink price oracles (A5 dependency).",
+  "artifacts": {
+    "source_repo": "github.com/compound-finance/comet",
+    "commit_hash": "0000000000000000000000000000000000000000",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0xc3d688b66703497daa19211eedff47f25384cdc3"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "obligation_map": {
+    "supply(address,uint256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "withdraw(address,uint256)": [
+      "A1",
+      "A2",
+      "A4",
+      "A5"
+    ],
+    "supplyCollateral(address,address,uint256)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "absorb(address,address[])": [
+      "A1",
+      "A5"
+    ],
+    "transferAsset(address,address,uint256)": [
+      "A1",
+      "A2"
+    ]
+  },
+  "proof_artifacts": {
+    "A1": {
+      "tool": "Certora",
+      "version": "7.0.0",
+      "verdict": "PASS",
+      "rule_id": "supply_invariant",
+      "artifact_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "A2": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 12,
+      "artifact_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "A4": {
+      "tool": "halmos",
+      "version": "1.0.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:00000000000000000000000000000000000000000000000000000000000000a4"
+    },
+    "A5": {
+      "tool": "halmos",
+      "version": "1.0.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:00000000000000000000000000000000000000000000000000000000000000a5"
+    }
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "governance timelock",
+        "guardian multisig"
+      ]
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "COMP token voting",
+        "proposal review period"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "Chainlink price feeds",
+        "fallback to TWAP"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "Cross-chain Compound bridges require separate certificates"
+  ],
+  "revalidation_triggers": [
+    "asset listing",
+    "rate model change",
+    "90 days elapsed"
+  ],
+  "issued_at": "2026-05-25T00:00:00Z",
+  "expires_at": "2026-08-25T00:00:00Z",
+  "issuer": {
+    "name": "PARALLAX-5 Paper Authors (speculative)",
+    "did": "did:web:parallax5.org",
+    "signature": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+  },
+  "_schema_note": "Legacy v8-era schema sketch. Does NOT validate against Certificate Schema v1.0. See paper/supplement/real_protocols/README.md for context. v1.0-validating examples are in examples/ and demos/*/output/."
+}

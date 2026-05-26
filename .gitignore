@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+build/
+dist/
+.venv/
+venv/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.run.xml
+
+# Foundry build artifacts
+registry/out/
+registry/cache/
+registry/broadcast/
+
+# Lean build artifacts
+.lake/
+build/
+.olean
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Editor
+.idea/
+.vscode/
+*.iml
+
+# Secrets / runtime config
+.env
+.env.local
+*.pem
+*.key
+deployment.env
+DEPLOYER_KEY
+PARALLAX5_REGISTRY_KEY
+
+# Local-only test data
+/tmp/
+/scratch/
+
+# ──────────────────────────────────────────────────────────────────────
+# Internal-only documents (kept locally for development; not for public push)
+# ──────────────────────────────────────────────────────────────────────
+STRATEGIC_CONTEXT_VITALIK_EF_MAY_2026.md
+VISION_AND_ROADMAP_v1.0.md
+VISION_AND_ROADMAP_v2.0.md
+NEW_CHAT_ONBOARDING.md
+CHANGELOG_v1_to_v2.md
+ARCHITECTURE_LOCK.json
+
+
+# Anonymous variant of the paper (built locally for distribution; not tracked)
+paper/parallax-5-anonymous.tex
+paper/parallax-5-anonymous.pdf
+paper/parallax-5-anonymous.*

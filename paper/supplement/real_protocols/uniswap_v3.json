@@ -1,0 +1,104 @@
+{
+  "schema_version": "PARALLAX-5/1.0",
+  "certificate_id": "p5cert-uniswap-v3-2026-05-25",
+  "protocol_id": "Uniswap V3 Core (Ethereum)",
+  "compliance_level": "P3",
+  "_classification_note": "Speculative classification. UniswapV3 has extensive formal verification work (Certora-verified invariants on swaps, mints, burns). Estimated P3-P4 with Certora artifacts; we conservatively assign P3 due to unverified components outside the core pool contract.",
+  "artifacts": {
+    "source_repo": "github.com/Uniswap/v3-core",
+    "commit_hash": "0000000000000000000000000000000000000000",
+    "deployed_addresses": [
+      {
+        "chain_id": 1,
+        "address": "0x1f98431c8ad98523631ae4a59f267346ea31f984"
+      }
+    ],
+    "bytecode_hashes": {
+      "ethereum": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "obligation_map": {
+    "swap(address,bool,int256,uint160,bytes)": [
+      "A1",
+      "A4",
+      "A5"
+    ],
+    "mint(address,int24,int24,uint128,bytes)": [
+      "A1",
+      "A4"
+    ],
+    "burn(int24,int24,uint128)": [
+      "A1",
+      "A2",
+      "A4"
+    ],
+    "collect(address,int24,int24,uint128,uint128)": [
+      "A1",
+      "A2",
+      "A4"
+    ]
+  },
+  "proof_artifacts": {
+    "A1": {
+      "tool": "Certora",
+      "version": "7.0.0",
+      "verdict": "PASS",
+      "rule_id": "swap_preserves_k_invariant",
+      "artifact_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "A4": {
+      "tool": "halmos",
+      "version": "0.3.3",
+      "verdict": "PASS",
+      "paths_explored": 18,
+      "artifact_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "A2": {
+      "tool": "Certora",
+      "version": "1.0.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:00000000000000000000000000000000000000000000000000000000000000a2"
+    },
+    "A5": {
+      "tool": "halmos",
+      "version": "1.0.0",
+      "verdict": "PASS",
+      "artifact_hash": "sha256:00000000000000000000000000000000000000000000000000000000000000a5"
+    }
+  },
+  "trust_base_assumptions": {
+    "OA1_key_integrity": {
+      "controls": [
+        "pool deployer key cold storage",
+        "fee setter multisig"
+      ]
+    },
+    "OA2_signer_sovereignty": {
+      "controls": [
+        "Uniswap Governance proposal process",
+        "Timelock contract"
+      ]
+    },
+    "OA3_infrastructure_integrity": {
+      "controls": [
+        "price obtained on-chain from pool reserves",
+        "no off-chain oracle dependency"
+      ]
+    }
+  },
+  "known_exclusions": [
+    "Periphery contracts (SwapRouter, NonfungiblePositionManager) require separate certificate"
+  ],
+  "revalidation_triggers": [
+    "fee tier addition",
+    "180 days elapsed"
+  ],
+  "issued_at": "2026-05-25T00:00:00Z",
+  "expires_at": "2026-11-25T00:00:00Z",
+  "issuer": {
+    "name": "PARALLAX-5 Paper Authors (speculative)",
+    "did": "did:web:parallax5.org",
+    "signature": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+  },
+  "_schema_note": "Legacy v8-era schema sketch. Does NOT validate against Certificate Schema v1.0. See paper/supplement/real_protocols/README.md for context. v1.0-validating examples are in examples/ and demos/*/output/."
+}
