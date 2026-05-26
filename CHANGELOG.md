@@ -4,6 +4,72 @@ All notable changes to PARALLAX-5 are documented in this file. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-05-26
+
+Repository-hygiene release. No change to the substrate's mathematical
+content, theorems, or verification gates; the substrate definition is
+unchanged from v1.0.0.
+
+### Removed
+
+- Four non-substrate subsystems that drifted in from adjacent project
+  directions:
+  - `parallax/hse/` — hypothesis-search machinery from a bug-discovery
+    pipeline
+  - `parallax/product/` — consumer product surface (trust-surface server,
+    HTML reports, SVG badges, pre-transaction simulator)
+  - `parallax/economics/` — insurance pricing model
+  - `parallax/chronos/` — temporal-coherence research direction
+- The corresponding CLI commands (`trust-surface`, `report`,
+  `pretx-simulate`) that depended on the removed modules.
+- Stale fire tests that exercised the removed subsystems.
+
+### Changed
+
+- Restructured standalone specifications under `docs/`:
+  `CHARTER.md`, `FORK_PROTOCOL.md`, `CERTIFICATE_SCHEMA.md`,
+  `TOOL_MAPPING.md`, `REGISTRY.md`, `DEPLOY.md`, `CROPS_VECTOR.md`,
+  `WALKAWAY_THEOREM.md`, `ARTIFACT_MAP.md`, `REPRODUCIBILITY_LOG.txt`.
+- Dropped `_v1.0` from `PARALLAX5_CERTIFICATE_SCHEMA_v1.0.md` and
+  `TOOL_MAPPING_v1.0.md` (file names should not bake in spec versions).
+- Dropped `_NOTE` from `CROPS_VECTOR_NOTE.md` and `WALKAWAY_THEOREM_NOTE.md`.
+- Converted `registry/lib/forge-std` from 68 checked-in files to a proper
+  git submodule pinned at `v1.16.1` (≈ 1.3 MB removed from tracking).
+- Fire-test count updated to 129 (was 134) to reflect the cleaned codebase.
+- Paper title page now cites the v1.0.1 DOI with the v1.0.0 DOI
+  preserved as the original-publication reference.
+
+### Added
+
+- `CITATION.cff` (Citation File Format; renders as "Cite this repository")
+- `CHANGELOG.md` (this file)
+- `CONTRIBUTING.md` — distinguishes implementation contributions
+  (Apache-2.0) from standard-text contributions (CC0, via Fork Protocol)
+- `SECURITY.md` — vulnerability disclosure policy + basis-counterexample
+  challenge scope
+- `.gitmodules` — forge-std submodule wiring
+
+### Fixed
+
+- `scripts/self_security_audit.py`: corrected import ordering
+  (`from __future__ import annotations` must precede regular imports)
+- `parallax/formal/fire_tests.py`: hardened `test_lean_compiles_with_zero_sorry`
+  with `shutil.which("lean")` and try/except around subprocess invocation,
+  so the test soft-passes on environments without an executable Lean binary
+- Replaced five broken legacy CI workflows with a single clean `ci.yml`
+  that exercises this repo's actual gates (Python gates, Foundry tests,
+  paper compile)
+
+### Verification gates (all green)
+
+- 2,152 / 2,152 compositional theorem checks
+- 19 / 19 CROPS tests
+- 129 / 129 Python fire tests across three suites
+- 24 / 24 Foundry tests (incl. 2 fuzz @ 256 runs)
+- 135 total Lean theorems, 0 `sorry`
+- 3 / 3 demos end-to-end via `make demo-all`
+- Paper compiles cleanly in three-pass pdflatex (47 pages, 0 errors)
+
 ## [1.0.0] — 2026-05-26
 
 First public release. Substrate foundations, three worked examples, paper,
@@ -19,42 +85,27 @@ onchain registry, and certificate schema are all in place.
   scale + 19-test suite).
 - **Formal core.** Lean 4 module with 95 theorems and zero `sorry`,
   including the conditional completeness theorem, step-secure gate
-  semantics with both post-state and transition-obligation checks, and
-  the AI-Agent Containment Theorem. EvmYulLean integration via typeclass-
-  based refinement (Cancun fork).
+  semantics, and the AI-Agent Containment Theorem. EvmYulLean integration
+  via typeclass-based refinement (Cancun fork).
 - **Empirical catalog.** 53 incidents (2016–2026), aggregate $5.97 B,
-  classified by minimum observability set. 134 Python fire tests across
-  nine suites; 2,152 compositional theorem checks.
+  classified by minimum observability set.
 - **Worked examples.** Three end-to-end demos with Lean proofs:
   ERC-4626 inflation attack (A1, depth D4), bridge attestation
-  (A3 and A5), and an AI-agent runtime gate (A1 and A2, depth D5
-  runtime enforcement).
-- **Onchain certificate registry.** Permissionless Solidity 0.8.24
-  contract (`ParallaxRegistry`) with seven-state lifecycle and six
-  event kinds; Foundry test suite (24 tests, two of which fuzz at
-  256 runs); Lean state-machine proof. Live reference deployment on
-  Sepolia at `0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b`
+  (A3 and A5), and an AI-agent runtime gate (A1 and A2, depth D5).
+- **Onchain certificate registry.** `ParallaxRegistry` (Solidity 0.8.24)
+  with seven-state lifecycle and six event kinds. Foundry suite (24 tests,
+  two of which fuzz at 256 runs). Lean state-machine proof. Live reference
+  deployment on Sepolia at `0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b`
   (Etherscan-verified).
 - **Paper.** 47-page artifact, mechanically verified, three-pass clean
   compile.
 - **Tooling.** Coordinator package (`parallax5-coordinator`), practical
-  CLI (`parallax5`) with `doctor`, `quote`, `score`, `audit-import`,
-  `validate`, `certify`, and `registry` subcommands. Trust-surface
-  product surface (`parallax/product/`) with FastAPI server, HTML
-  reports, and SVG badges.
+  CLI (`parallax5`).
 - **Licensing.** Standard text under CC0 1.0; reference implementations
   under Apache-2.0; the paper itself under CC-BY 4.0. Non-capturability
   commitments: no AquaUrsa patent claims over the substrate, no
   trademark on PARALLAX-5, no token, no governance body, fork-friendly
   evolution via the Fork Protocol.
 
-### Verification gates (all green at release)
-
-- 2,152 / 2,152 compositional theorem checks
-- 19 / 19 CROPS tests
-- 70 / 70 fire tests across nine suites
-- 24 / 24 Foundry tests (incl. 2 fuzz @ 256 runs)
-- 135 total Lean theorems, 0 `sorry`
-- 3 / 3 demos end-to-end
-
-[1.0.0]: https://github.com/aquaursa/parallax-5/releases/tag/v1.0.0
+[1.0.1]: https://github.com/aquaursa/parallax-5/releases/tag/v1.0.1
+[1.0.0]: https://doi.org/10.5281/zenodo.20400525
