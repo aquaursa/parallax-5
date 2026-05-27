@@ -2,6 +2,13 @@
 
 **A five-obligation substrate for smart contracts and AI agents.**
 
+[![CI](https://github.com/aquaursa/parallax-5/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aquaursa/parallax-5/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20402755-blue)](https://doi.org/10.5281/zenodo.20402755)
+[![Lean theorems](https://img.shields.io/badge/Lean%20theorems-95-green)](parallax/formal/lean/Parallax5.lean)
+[![Sorry count](https://img.shields.io/badge/sorry-0-success)](parallax/formal/lean/Parallax5.lean)
+[![Catalog](https://img.shields.io/badge/empirical%20catalog-%245.97B%20across%2053%20incidents-orange)](paper/supplement/catalog.csv)
+
 <table>
   <tr><td><strong>Paper</strong></td>     <td><a href="paper/parallax-5.pdf"><code>paper/parallax-5.pdf</code></a> · <a href="https://doi.org/10.5281/zenodo.20402755">doi:10.5281/zenodo.20402755</a></td></tr>
   <tr><td><strong>Verification artifact</strong></td><td><a href="https://doi.org/10.5281/zenodo.20386868">doi:10.5281/zenodo.20386868</a></td></tr>
