@@ -15,15 +15,15 @@ abstract: >-
 authors:
   - name: "AquaUrsa Research"
     website: "https://aquaursa.io"
-version: "1.0.0"
+version: "1.0.1"
 date-released: 2026-05-26
 license:
   - CC-BY-4.0
   - Apache-2.0
   - CC0-1.0
 repository-code: "https://github.com/aquaursa/parallax-5"
-url: "https://doi.org/10.5281/zenodo.20400525"
-doi: 10.5281/zenodo.20400525
+url: "https://doi.org/10.5281/zenodo.20402755"
+doi: 10.5281/zenodo.20402755
 keywords:
   - formal verification
   - Lean 4
