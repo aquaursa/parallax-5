@@ -18,13 +18,16 @@ The reproduction takes ~3 minutes (Python gates) or ~10 minutes (with the Foundr
 
 | Claim | Value | How to verify |
 |---|---|---|
-| Lean theorems in `parallax/formal/lean/Parallax5.lean` | **95** | `grep -cE "^theorem \|^lemma " parallax/formal/lean/Parallax5.lean` |
-| Lean theorems total across the repository | **177** | `find . -name "*.lean" -exec grep -hE "^theorem \|^lemma " {} \; \| wc -l` |
-| `sorry` occurrences in proof bodies (excluding comments) | **0** | `find . -name "*.lean" -exec grep -hE "(^\|\s)sorry(\s\|$)" {} \; \| grep -vE "^\s*(--\|/\*)" \| wc -l` |
+| Lean theorems in `parallax/formal/lean/Parallax5.lean` (paper-canonical core) | **95** | `grep -cE "^theorem \|^lemma " parallax/formal/lean/Parallax5.lean` |
+| Lean theorems across substrate + demos (CHANGELOG v1.0.1 aggregate) | **135** | `find . -name "*.lean" -not -path "./notebooks/*" -exec grep -hE "^theorem \|^lemma " {} \; \| wc -l` |
+| Lean theorems including exploratory notebooks | **177** | `find . -name "*.lean" -exec grep -hE "^theorem \|^lemma " {} \; \| wc -l` |
+| `sorry` occurrences in proof bodies (excluding comments) | **0** (across all 177) | `find . -name "*.lean" -exec grep -hE "(^\|\s)sorry(\s\|$)" {} \; \| grep -vE "^\s*(--\|/\*)" \| wc -l` |
 | Lean toolchain (`Parallax5.lean` core) | **4.10.0** | See file header |
 | Lean toolchain (`Parallax5_EvmYulLean.lean` instance) | **4.22.0** | Matches Nethermind/EVMYulLean's `lean-toolchain` |
 
-The `Parallax5.lean` core is the bulk of the mechanization. The EVMYulLean instance file lives on a different Lean toolchain track to match the upstream EVMYulLean version. Abstract refinement theorems transfer to the concrete instance by parametricity.
+The `Parallax5.lean` core (95 theorems) is the bulk of the mechanization and what the paper cites in its main claim. The CHANGELOG's 135 figure aggregates the core with `lean/Parallax5/*.lean` (Compositional, Walkaway, Registry) and the three demo proofs (Vault Conservation, Bridge Attestation, Agent-gate Containment). The additional 42 theorems in `notebooks/lean_modules/` are exploratory work and not load-bearing for the substrate's main claims.
+
+The EVMYulLean instance file lives on a different Lean toolchain track to match the upstream EVMYulLean version. Abstract refinement theorems transfer to the concrete instance by parametricity.
 
 ## Empirical catalog
 
