@@ -7,7 +7,7 @@
   <tr><td><strong>Verification artifact</strong></td><td><a href="https://doi.org/10.5281/zenodo.20386868">doi:10.5281/zenodo.20386868</a></td></tr>
   <tr><td><strong>Onchain reference (Sepolia)</strong></td><td><a href="https://sepolia.etherscan.io/address/0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b#code"><code>0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b</code></a></td></tr>
   <tr><td><strong>Version</strong></td>   <td>1.0.1</td></tr>
-  <tr><td><strong>Status</strong></td>    <td>All gates green: 2,152 compositional · 19 CROPS · 70 fire tests · 24 Foundry · 47-page paper compiles cleanly</td></tr>
+  <tr><td><strong>Status</strong></td>    <td>All gates green: 2,152 compositional · 129 Python fire tests · 24 Foundry · 47-page paper compiles cleanly</td></tr>
   <tr><td><strong>Verify all claims</strong></td><td><a href="CANONICAL_FACTS.md"><code>CANONICAL_FACTS.md</code></a> — single source of truth, reproducible in 3 min via <a href="RUN_VERIFICATION.sh"><code>./RUN_VERIFICATION.sh</code></a></td></tr>
   <tr><td><strong>Licenses</strong></td>  <td>Paper: CC-BY 4.0 · Standard text: CC0 1.0 · Code: Apache-2.0</td></tr>
 </table>

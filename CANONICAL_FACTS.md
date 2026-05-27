@@ -40,15 +40,19 @@ The `Parallax5.lean` core is the bulk of the mechanization. The EVMYulLean insta
 
 | Suite | Pass count | Where it runs |
 |---|---|---|
-| Compositional theorems | **2,152** | `python -m parallax5_coordinator.theorems` |
+| **All Python fire tests (paper-canonical aggregate)** | **129** | All Python test files combined; matches paper §1 claim |
+| Compositional theorems (sub-checks) | **2,152** | `python -m parallax5_coordinator.theorems` |
 | CROPS test suite (cross-runtime obligation-preserving) | **19/19** | `python tests/test_crops.py` |
-| Fire tests (formal core) | **70/70** | `python parallax/formal/fire_tests.py` |
-| ObligationSol fire tests | (passes) | `python parallax/obligationsol/fire_tests.py` |
+| Fire tests (`parallax/formal/fire_tests.py`) | **65/65** | `python parallax/formal/fire_tests.py` |
+| ObligationSol fire tests | **10/10** | `python parallax/obligationsol/fire_tests.py` |
+| Obligations fire tests | **3/3** | `python parallax/obligations/fire_tests.py` |
 | Mapping registry tests | **11/11** | `python -m pytest tests/test_mapping_registry.py -v` |
 | Foundry tests (ParallaxRegistry) | **24/24** | `cd registry && forge test` (includes 2 fuzz tests at 256 runs) |
 | Paper compile | 3-pass pdflatex, **0 errors, 0 unresolved refs** | `cd paper && pdflatex parallax-5.tex` (×3) |
 
-All of these are gated in CI on every push and PR — see `.github/workflows/ci.yml`.
+Self-consistency: `parallax/formal/fire_tests.py::test_paper_counts_match_artifact_state` programmatically asserts that the paper text contains the string "129 Python fire tests" and that `parallax/formal/lean/Parallax5.lean` contains 95 theorems with zero `sorry`. Any drift between paper and code fails CI.
+
+All of these are gated on every push and PR — see `.github/workflows/ci.yml`.
 
 ## On-chain artifacts
 

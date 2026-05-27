@@ -18,7 +18,7 @@ contributions in two distinct modes:
 - Add tests. The substrate's gates are the only way a change can be
   trusted: a contribution that doesn't extend coverage isn't load-bearing.
 - Run `./RUN_VERIFICATION.sh` locally before opening a PR. All gates must
-  remain green: 2,152 compositional checks, 19 CROPS tests, 70 fire tests,
+  remain green: 2,152 compositional checks, 19 CROPS tests, 129 Python fire tests (aggregate),
   24 Foundry tests, paper compiles cleanly.
 - CI runs the same gates on every push (`.github/workflows/ci.yml`).
 
