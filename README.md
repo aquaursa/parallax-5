@@ -2,12 +2,20 @@
 
 **A five-obligation substrate for smart contracts and AI agents.**
 
+[![CI](https://github.com/aquaursa/parallax-5/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aquaursa/parallax-5/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20402755-blue)](https://doi.org/10.5281/zenodo.20402755)
+[![Lean theorems](https://img.shields.io/badge/Lean%20theorems-95-green)](parallax/formal/lean/Parallax5.lean)
+[![Sorry count](https://img.shields.io/badge/sorry-0-success)](parallax/formal/lean/Parallax5.lean)
+[![Catalog](https://img.shields.io/badge/empirical%20catalog-%245.97B%20across%2053%20incidents-orange)](paper/supplement/catalog.csv)
+
 <table>
-  <tr><td><strong>Paper</strong></td>     <td><a href="paper/parallax-5.pdf"><code>paper/parallax-5.pdf</code></a> · <a href="https://doi.org/10.5281/zenodo.20400525">doi:10.5281/zenodo.20400525</a></td></tr>
+  <tr><td><strong>Paper</strong></td>     <td><a href="paper/parallax-5.pdf"><code>paper/parallax-5.pdf</code></a> · <a href="https://doi.org/10.5281/zenodo.20402755">doi:10.5281/zenodo.20402755</a></td></tr>
   <tr><td><strong>Verification artifact</strong></td><td><a href="https://doi.org/10.5281/zenodo.20386868">doi:10.5281/zenodo.20386868</a></td></tr>
   <tr><td><strong>Onchain reference (Sepolia)</strong></td><td><a href="https://sepolia.etherscan.io/address/0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b#code"><code>0x8015A98dF9037Cd79a03B291a6fF3C2841992D5b</code></a></td></tr>
-  <tr><td><strong>Version</strong></td>   <td>1.0.0</td></tr>
-  <tr><td><strong>Status</strong></td>    <td>All gates green: 2,152 compositional · 19 CROPS · 70 fire tests · 24 Foundry · 47-page paper compiles cleanly</td></tr>
+  <tr><td><strong>Version</strong></td>   <td>1.0.1</td></tr>
+  <tr><td><strong>Status</strong></td>    <td>All gates green: 2,152 compositional · 129 Python fire tests · 24 Foundry · 47-page paper compiles cleanly</td></tr>
+  <tr><td><strong>Verify all claims</strong></td><td><a href="CANONICAL_FACTS.md"><code>CANONICAL_FACTS.md</code></a> — single source of truth, reproducible in 3 min via <a href="RUN_VERIFICATION.sh"><code>./RUN_VERIFICATION.sh</code></a></td></tr>
   <tr><td><strong>Licenses</strong></td>  <td>Paper: CC-BY 4.0 · Standard text: CC0 1.0 · Code: Apache-2.0</td></tr>
 </table>
 
@@ -90,8 +98,8 @@ The full verification recipe runs all gates locally. Continuous integration runs
   title     = {{PARALLAX-5: A Five-Obligation Substrate for Smart Contracts
                 and AI Agents}},
   year      = {2026},
-  version   = {1.0.0},
-  doi       = {10.5281/zenodo.20400525},
+  version   = {1.0.1},
+  doi       = {10.5281/zenodo.20402755},
   url       = {https://github.com/aquaursa/parallax-5},
   note      = {Companion verification artifact:
                doi:10.5281/zenodo.20386868}
