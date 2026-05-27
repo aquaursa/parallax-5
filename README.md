@@ -30,8 +30,9 @@ parallax-5/
 ├── paper/                  Paper (parallax-5.pdf, 47 pages) and supplements
 ├── docs/                   Standalone specifications:
 │                             CHARTER, FORK_PROTOCOL, CERTIFICATE_SCHEMA,
-│                             TOOL_MAPPING, REGISTRY, DEPLOY, CROPS_VECTOR,
-│                             WALKAWAY_THEOREM, ARTIFACT_MAP
+│                             MAPPING_PROTOCOL, REGISTRY, DEPLOY, CROPS_VECTOR,
+│                             WALKAWAY_THEOREM, ARTIFACT_MAP, TOOL_COMPARISON,
+│                             plus the eight persona-driven docs added in v1.1.0
 ├── schemas/                JSON Schema for the certificate (v1.0)
 ├── parallax/               The substrate (research code):
 │                             formal/  Lean 4 module + Z3 + halmos + 53-incident catalog
@@ -70,12 +71,26 @@ The full verification recipe runs all gates locally. Continuous integration runs
 ## Navigation
 
 - **Read the paper.** [`paper/parallax-5.pdf`](paper/parallax-5.pdf) — the canonical 47-page artifact.
+- **The AI-Agent Containment Theorem worked example.** [`demos/agent_gate/`](demos/agent_gate/) — Demo 3 deploys an explicit adversarial agent behind a PARALLAX-5 gate; Lean proof in [`demos/agent_gate/proof/Containment.lean`](demos/agent_gate/proof/Containment.lean). The most concrete demonstration of the substrate's central AI-safety claim.
+- **Challenge a specific claim.** [`paper/FALSIFICATION_CHALLENGE.md`](paper/FALSIFICATION_CHALLENGE.md) — the formal falsification surface for the substrate's main claims; the basis-counterexample bounty.
 - **Use the substrate.**
   - [`docs/CHARTER.md`](docs/CHARTER.md) — the structurally irrevocable non-capturability commitments.
   - [`docs/FORK_PROTOCOL.md`](docs/FORK_PROTOCOL.md) — how to fork the standard cleanly.
   - [`docs/CERTIFICATE_SCHEMA.md`](docs/CERTIFICATE_SCHEMA.md) — the certificate format specification.
-  - [`docs/TOOL_MAPPING.md`](docs/TOOL_MAPPING.md) — the calibration standard mapping security tools to depth levels.
+  - [`docs/MAPPING_PROTOCOL.md`](docs/MAPPING_PROTOCOL.md) — protocol for authoring tool-mapping documents in the `tool-mapping/{author}-v{major}` namespace.
   - [`docs/REGISTRY.md`](docs/REGISTRY.md) — the onchain registry contract reference.
+- **For partners and integrators.**
+  - [`docs/FOR_INTEGRATORS.md`](docs/FOR_INTEGRATORS.md) — how audit firms, runtime monitors, and AI safety platforms integrate the substrate (three patterns: tool-mapping, certificate-issuing, runtime-gate).
+  - [`docs/COMPLIANCE_MAPPING.md`](docs/COMPLIANCE_MAPPING.md) — EU AI Act / DORA / NIST AI RMF / ISO 42001 article-by-article mapping for Big 4 and regulatory consultants.
+  - [`docs/RELATED_WORK.md`](docs/RELATED_WORK.md) — positioning vs Certora, K-framework, MIRAI, Move Prover, CertiK, and the operational security tool ecosystem.
+  - [`docs/TOOL_COMPARISON.md`](docs/TOOL_COMPARISON.md) — coverage matrix and engagement cost comparison across Slither, Mythril, halmos, Foundry, Certora, and the substrate's own checkers.
+  - [`docs/IP_PROVENANCE.md`](docs/IP_PROVENANCE.md) — IP situation, license layering, contributor model, patent and trademark posture for M&A counsel and Big 4 third-party risk teams.
+- **For researchers.**
+  - [`docs/THEOREM_INDEX.md`](docs/THEOREM_INDEX.md) — annotated index of the 95-theorem Lean core; identifies load-bearing theorems with intuitions.
+  - [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) — research roadmap; substantive contributions earn co-authorship on v1.1+ revisions.
+  - [`docs/EVMYUL_COMPOSITION.md`](docs/EVMYUL_COMPOSITION.md) — methodology for substrate × VM-semantics composition, with the EVMYulLean instance as the reference.
+  - [`docs/AI_SAFETY_INTERPRETATION.md`](docs/AI_SAFETY_INTERPRETATION.md) — substrate translated into AI-safety vocabulary (Tegmark, Anthropic RSP, Constitutional AI, mechanistic interpretability).
+  - [`docs/CATALOG_METHODOLOGY.md`](docs/CATALOG_METHODOLOGY.md) — how the 53-incident catalog was constructed; inter-rater reliability; falsification surface.
 - **Run the demos.** `make demo-all` exercises the three end-to-end worked examples.
 - **Validate a certificate.** `parallax5 validate path/to/cert.json` after install.
 - **Compose a P-level certificate.** `parallax5-coordinator analyze tests/VulnerableLending.sol --output /tmp/cert.json` produces a defensible certificate from Slither, Mythril, halmos, and ObligationSol output.
