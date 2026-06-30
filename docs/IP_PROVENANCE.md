@@ -1,6 +1,6 @@
 # IP Provenance
 
-This document is for M&A due diligence analysts, law firms preparing definitive acquisition agreements, Big 4 audit firms conducting third-party risk assessments, and corporate development teams evaluating PARALLAX-5 as an acquisition or partnership target.
+This document states the intellectual-property situation across the repository for any reviewer who needs it: integrators, auditors, legal reviewers, and partners. It is written to support review directly from the repository, without requiring separate disclosure.
 
 It states the IP situation across the full repository: ownership, license layering, contributions, third-party dependencies, patent posture, trademark posture, and structural non-capturability commitments. It is written to support legal review without requiring document discovery beyond the repository itself.
 
@@ -8,9 +8,9 @@ For the underlying licenses, see `LICENSE` (Apache-2.0 for code), `LICENSE-CC0` 
 
 ## Ownership
 
-AquaUrsa Research LLC, a Wyoming limited liability company, owns the copyright on all original work in this repository. The LLC is solely owned by Ben Duncan (founder).
+AquaUrsa Research LLC, a Wyoming limited liability company, owns the copyright on all original work in this repository.
 
-The repository's commit history is the authoritative attribution record. Every commit on `main` is authored by `AquaUrsa Research <research@aquaursa.io>`. No external contributors have committed to `main` as of v1.1.0.
+The repository's commit history is the authoritative attribution record. Every commit on `main` is authored by `AquaUrsa Research <research@aquaursa.ai>`. No external contributors have committed to `main` as of v1.1.0.
 
 Pull request branches authored by external contributors are accepted under the contribution terms in `CONTRIBUTING.md`, which require either Apache-2.0 contributions (for code) or CC0 dedication (for Standard text contributions). The contribution agreement is documented at the time of pull-request acceptance.
 
@@ -72,7 +72,7 @@ AquaUrsa Research LLC has filed no trademark applications on "PARALLAX-5", "PARA
 
 `docs/CHARTER.md` documents eleven structural commitments that make the substrate non-capturable by any single entity, including AquaUrsa. The commitments are intentionally irrevocable: the CC0 dedication of the Standard text cannot be withdrawn, the no-patent commitment is structurally tied to Apache-2.0, the no-trademark commitment is structurally tied to the CC0 dedication, and so on.
 
-For an M&A analyst evaluating PARALLAX-5 as an acquisition target, this is the critical posture point. AquaUrsa cannot sell exclusive rights to the substrate; the rights are publicly dedicated and structurally irrevocable. What AquaUrsa can sell is the corporate entity, the founder (Ben Duncan) as employee or advisor, the commercial Co-Pilot SaaS layer, the brand and customer relationships of AquaUrsa, and the engineering work product around the substrate.
+The posture point that follows from this is deliberate: exclusive rights to the substrate cannot be granted to anyone, because the rights are publicly dedicated and structurally irrevocable. The substrate is not an asset any single party can capture. What stands on top of it -- the commercial Co-Pilot layer, the engineering work product, the brand and the relationships -- is ordinary owned work; the substrate beneath it is a public good by construction.
 
 This is intentional. The substrate gains value as it becomes more widely adopted. Wide adoption requires non-capturability. Non-capturability is the foundation of the strategic position.
 
@@ -110,11 +110,11 @@ For an acquirer preferring exclusive substrate rights, no acquisition structure 
 
 ## Engagement
 
-For acquisition or partnership conversations involving IP review, contact `research@aquaursa.io`. AquaUrsa is open to NDA-covered IP diligence conversations after a substantive first contact.
+For acquisition or partnership conversations involving IP review, contact `research@aquaursa.ai`. AquaUrsa is open to NDA-covered IP diligence conversations after a substantive first contact.
 
 For M&A counsel preparing definitive agreements, AquaUrsa can refer to its own counsel for direct engagement. The relevant context is that the substrate's IP posture is intentional and not subject to negotiation. The commercial wrapper's IP terms are negotiable per standard M&A practice.
 
-For Big 4 third-party risk assessments, this document provides the standard answers. Specific questions beyond this document can be directed to `research@aquaursa.io`.
+For Big 4 third-party risk assessments, this document provides the standard answers. Specific questions beyond this document can be directed to `research@aquaursa.ai`.
 
 ## Document version
 

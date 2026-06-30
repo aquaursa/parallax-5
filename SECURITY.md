@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Email `security@aquaursa.io` with details. Please do not open a public
+Email `security@aquaursa.ai` with details. Please do not open a public
 issue for vulnerabilities until they have been triaged.
 
 For each report, include:

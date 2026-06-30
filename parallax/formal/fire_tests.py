@@ -863,7 +863,6 @@ def test_all_review_required_docs_exist():
         "paper/FALSIFICATION_CHALLENGE.md",
         "paper/PRODUCT_TIERS.md",
         "paper/VISION.md",
-        "paper/ROADMAP_30_DAYS.md",
         "paper/CLASSIFICATION_CODEBOOK.md",
         "paper/STANDARDS_COMPARISON.md",
         "paper/PRACTITIONER_GUIDE.md",

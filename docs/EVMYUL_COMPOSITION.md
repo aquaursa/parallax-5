@@ -197,4 +197,4 @@ For Nethermind specifically, AquaUrsa is open to formal collaboration on trackin
 
 For tool vendors wanting to map findings to the composed theorems, the `tool-mapping/{author}-v1` namespace pattern in `docs/MAPPING_PROTOCOL.md` applies.
 
-Cold-email engagement is welcome at `research@aquaursa.io`.
+Cold-email engagement is welcome at `research@aquaursa.ai`.

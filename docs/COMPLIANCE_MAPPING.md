@@ -135,11 +135,11 @@ A notified body issuing a conformity certificate under EU AI Act Annex VII retai
 
 ## Engagement
 
-For Big 4 firms or specialized auditors preparing compliance assessments, the open-source substrate is freely usable without engagement. For commercial engagements (compliance mapping reviews, custom integrations, expert support for high-stakes assessments), contact `research@aquaursa.io`. The Enterprise SaaS tier includes a DORA-aligned documentation template.
+For Big 4 firms or specialized auditors preparing compliance assessments, the open-source substrate is freely usable without engagement. For commercial engagements (compliance mapping reviews, custom integrations, expert support for high-stakes assessments), contact `research@aquaursa.ai`. The Enterprise SaaS tier includes a DORA-aligned documentation template.
 
 For financial entities preparing DORA documentation, the Enterprise tier documentation template handles the standard cases. For protocol-specific PARALLAX-5 binding work, the public grant track is the appropriate path; for private engagement, contact AquaUrsa directly.
 
-For notified bodies and competent authorities, AquaUrsa is open to dialogue on certification-process integration. Contact `research@aquaursa.io`.
+For notified bodies and competent authorities, AquaUrsa is open to dialogue on certification-process integration. Contact `research@aquaursa.ai`.
 
 ## Versioning
 

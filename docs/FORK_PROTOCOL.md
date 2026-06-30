@@ -108,7 +108,7 @@ A party publishes a verification substrate that does not claim continuity with P
 **5.1** Forks that claim derivation from PARALLAX-5 should cite the parent. The minimum citation is:
 
 ```bibtex
-@misc{duncan2026parallax5verification,
+@misc{aquaursa2026parallax5verification,
   author    = {{AquaUrsa Research}},
   title     = {{PARALLAX-5 / EVMYulLean Integration Verification}},
   year      = {2026},
@@ -224,7 +224,7 @@ The following are illustrative examples of how the Protocol might be applied in 
 ## Article 11 — Citation
 
 ```bibtex
-@misc{duncan2026parallaxforkprotocol,
+@misc{aquaursa2026parallaxforkprotocol,
   author    = {{AquaUrsa Research}},
   title     = {{Fork Protocol: PARALLAX-5}},
   year      = {2026},

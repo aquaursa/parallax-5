@@ -168,7 +168,7 @@ The Charter does not, however, depend on the endorsement of any of these. It sta
 ## Article 11 — Citation
 
 ```bibtex
-@misc{duncan2026parallaxcharter,
+@misc{aquaursa2026parallaxcharter,
   author    = {{AquaUrsa Research}},
   title     = {{Non-Capturability Charter: PARALLAX-5}},
   year      = {2026},

@@ -14,7 +14,7 @@ abstract: >-
   EVM semantics via EvmYulLean.
 authors:
   - name: "AquaUrsa Research"
-    website: "https://aquaursa.io"
+    website: "https://aquaursa.ai"
 version: "1.0.1"
 date-released: 2026-05-26
 license:

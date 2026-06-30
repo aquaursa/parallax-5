@@ -581,7 +581,7 @@ These questions are open for resolution in v1.1 based on community feedback.
 ## 11. Citation
 
 ```bibtex
-@misc{duncan2026parallax5certschema,
+@misc{aquaursa2026parallax5certschema,
   author    = {{AquaUrsa Research}},
   title     = {{PARALLAX-5 Certificate Schema RFC v1.0}},
   year      = {2026},

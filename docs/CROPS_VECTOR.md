@@ -287,7 +287,7 @@ These questions are open and welcome adversarial input.
 ## 10. Citation
 
 ```bibtex
-@misc{duncan2026cropsvector,
+@misc{aquaursa2026cropsvector,
   author    = {{AquaUrsa Research}},
   title     = {{CROPS Vector: Multi-Dimensional Trust-Surface Rating in PARALLAX-5}},
   year      = {2026},

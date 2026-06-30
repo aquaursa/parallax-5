@@ -74,7 +74,7 @@ All of these are gated on every push and PR — see `.github/workflows/ci.yml`.
 | EVMYulLean integration verification artifact | DOI `10.5281/zenodo.20386868` | https://doi.org/10.5281/zenodo.20386868 |
 | GitHub repository | `aquaursa/parallax-5` | https://github.com/aquaursa/parallax-5 |
 | Marketing site | parallax.aquaursa.ai | https://parallax.aquaursa.ai |
-| Author / org | AquaUrsa Research LLC (Wyoming, USA) | research@aquaursa.io |
+| Author / org | AquaUrsa Research LLC (Wyoming, USA) | research@aquaursa.ai |
 
 The Zenodo v1.0.1 deposit is the most recent version. v1.0.0 remains accessible at its original DOI but is superseded.
 

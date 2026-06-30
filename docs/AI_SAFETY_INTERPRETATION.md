@@ -142,8 +142,8 @@ The right portfolio framing: the AI safety field benefits from accumulating more
 
 Researchers interested in the formal core should start with `docs/THEOREM_INDEX.md` and then read `parallax/formal/lean/Parallax5.lean` for the central theorems. The paper at `paper/parallax-5.pdf` provides the complete development.
 
-Researchers considering collaboration should review `docs/OPEN_PROBLEMS.md` and contact `research@aquaursa.io` with proposed scope.
+Researchers considering collaboration should review `docs/OPEN_PROBLEMS.md` and contact `research@aquaursa.ai` with proposed scope.
 
 Organizations considering the substrate for operational use should review `docs/FOR_INTEGRATORS.md` for the three integration patterns. The runtime-gate pattern is the most relevant for AI safety deployments.
 
-Anthropic and similar organizations interested in exploratory conversation about RSP integration, CAI composition, or AI safety alignment can reach AquaUrsa at `research@aquaursa.io`. The substrate's open-source posture means no commercial relationship is required for evaluation, integration, or research use.
+Anthropic and similar organizations interested in exploratory conversation about RSP integration, CAI composition, or AI safety alignment can reach AquaUrsa at `research@aquaursa.ai`. The substrate's open-source posture means no commercial relationship is required for evaluation, integration, or research use.

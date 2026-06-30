@@ -262,7 +262,7 @@ The mapping is recalibrated annually with a published list of tool-version updat
 ## 10. Citation
 
 ```bibtex
-@misc{duncan2026toolmapping,
+@misc{aquaursa2026toolmapping,
   author    = {{AquaUrsa Research}},
   title        = {{TOOL-MAPPING v1.0: Canonical Mapping of Smart-Contract
                   Analysis Tool Findings to PARALLAX-5 Obligations}},

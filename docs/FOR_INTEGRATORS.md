@@ -102,11 +102,11 @@ Most integrators start with Pattern 1 (lowest cost, clearest value), then add Pa
 
 ## Partnership engagement
 
-For audit firms and tooling vendors, the open-source substrate is freely usable without engagement. The reference mapping at `aquaursa-v1` is in the canonical registry as a public good. For commercial Co-Pilot SaaS subscriptions, see parallax.aquaursa.ai. For joint case studies, mapping document publication, and co-branded compliance materials, contact `research@aquaursa.io`.
+For audit firms and tooling vendors, the open-source substrate is freely usable without engagement. The reference mapping at `aquaursa-v1` is in the canonical registry as a public good. For commercial Co-Pilot SaaS subscriptions, see parallax.aquaursa.ai. For joint case studies, mapping document publication, and co-branded compliance materials, contact `research@aquaursa.ai`.
 
-For AI safety platforms (Cisco AI Defense and similar), the same open-source posture applies. Substantive engineering integration benefits from a formal partnership agreement. For exploratory conversation about runtime-gate integration, the Singer, Sampath, or Gillis cold-email channel is open. Contact `research@aquaursa.io`.
+For AI safety platforms (Cisco AI Defense and similar), the same open-source posture applies. Substantive engineering integration benefits from a formal partnership agreement. For exploratory conversation about runtime-gate integration, the Singer, Sampath, or Gillis cold-email channel is open. Contact `research@aquaursa.ai`.
 
-For Big 4 firms (Deloitte, PwC, KPMG, EY), see `docs/COMPLIANCE_MAPPING.md` for the regulatory-evidence framing. For Big 4 partnerships, contact `research@aquaursa.io`.
+For Big 4 firms (Deloitte, PwC, KPMG, EY), see `docs/COMPLIANCE_MAPPING.md` for the regulatory-evidence framing. For Big 4 partnerships, contact `research@aquaursa.ai`.
 
 For research collaborators, `docs/OPEN_PROBLEMS.md` lists the explicit research roadmap. Co-authorship on v1.1 and later paper revisions is open to substantive contributors.
 

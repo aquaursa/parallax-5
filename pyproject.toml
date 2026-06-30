@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Compositional smart-contract verification via PARALLAX-5 obligation mapping"
 readme = "README.md"
 authors = [
-    {name = "AquaUrsa Research", email = "research@aquaursa.io"}
+    {name = "AquaUrsa Research", email = "research@aquaursa.ai"}
 ]
 license = {text = "Apache-2.0"}
 classifiers = [

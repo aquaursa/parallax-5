@@ -235,7 +235,7 @@ These are areas for v1.1 of the theorem.
 ## 13. Citation
 
 ```bibtex
-@misc{duncan2026walkawaytheorem,
+@misc{aquaursa2026walkawaytheorem,
   author    = {{AquaUrsa Research}},
   title     = {{The Walkaway Theorem: Formalizing Capture-Resistance in PARALLAX-5}},
   year      = {2026},

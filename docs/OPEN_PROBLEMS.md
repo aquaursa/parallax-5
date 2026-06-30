@@ -4,7 +4,7 @@ PARALLAX-5 v1.1.0 leaves several research problems unresolved. This document lis
 
 The problems are organized by category: substrate-internal questions about the formalization, runtime-extension work carrying the framework to additional VM semantics, empirical questions about the catalog and observability, and adjacent problems whose solution would compose with PARALLAX-5.
 
-For each problem, the description covers what the problem is, what makes progress difficult, and what would constitute progress. Co-authorship on v1.1 and later paper revisions is open to substantive contributors. Research Fellow listing on AquaUrsa Research is available for sustained collaboration. Contact `research@aquaursa.io`.
+For each problem, the description covers what the problem is, what makes progress difficult, and what would constitute progress. Co-authorship on v1.1 and later paper revisions is open to substantive contributors. Research Fellow listing on AquaUrsa Research is available for sustained collaboration. Contact `research@aquaursa.ai`.
 
 ## Substrate-internal
 
@@ -132,7 +132,7 @@ Progress would be a formal policy language (extending Open Policy Agent or a sim
 
 ## Engagement
 
-For low-effort engagement (a discussion, a critique, a pointer to related work), email `research@aquaursa.io`. Aim for response within two weeks.
+For low-effort engagement (a discussion, a critique, a pointer to related work), email `research@aquaursa.ai`. Aim for response within two weeks.
 
 For substantive collaboration (joint paper, joint experiment, mutual citations), open a short proposal email describing what you would contribute and what you would need from us. Co-authorship on v1.1 and later paper revisions is open to substantive contributors.
 

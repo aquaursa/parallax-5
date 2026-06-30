@@ -108,7 +108,7 @@ Additional tool mappings under the `tool-mapping/{author}-v{major}` namespace ar
 
 Independent verification of the empirical catalog is open. `paper/FALSIFICATION_CHALLENGE.md` and `docs/CATALOG_METHODOLOGY.md` provide the falsification surface and the methodology for challenge.
 
-Co-authorship on the v1.1 paper revision is available for substantive contributors in any of the above categories. Cold-email engagement is welcome at `research@aquaursa.io`.
+Co-authorship on the v1.1 paper revision is available for substantive contributors in any of the above categories. Cold-email engagement is welcome at `research@aquaursa.ai`.
 
 ## How to position your work
 

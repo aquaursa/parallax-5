@@ -150,4 +150,4 @@ For audit firms interested in issuing PARALLAX-5 certificates as deliverables, s
 
 For protocol teams evaluating which combination of tools to use, the Co-Pilot SaaS includes a depth-coverage calculator that recommends tool combinations for target depth and budget.
 
-Contact `research@aquaursa.io` for partnership conversations, mapping submissions, or commercial engagement.
+Contact `research@aquaursa.ai` for partnership conversations, mapping submissions, or commercial engagement.
